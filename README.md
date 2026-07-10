@@ -185,6 +185,10 @@ python -m http.server 8080
 | PyInstaller | EXE 打包 |
 | Docker / Gunicorn | 容器化部署 |
 
+## 参考与致谢
+
+本项目的核心思路参考了开源目录扫描工具 **Dirsearch**（[maurosoria/dirsearch](https://github.com/maurosoria/dirsearch)）：同样基于字典向目标发起 HTTP 请求、依据响应状态码判断路径是否存在。ListScanner 在其基础上更聚焦于"敏感文件与配置泄露"场景，并补充了风险分级与内置教学靶场。
+
 ## 合规声明
 
 本工具仅用于授权环境下的安全测试与教学实验，不包含密码爆破、漏洞利用、认证绕过或批量攻击等功能。使用者须确保已获得目标系统的明确授权。因滥用本工具造成的一切后果由使用者自行承担。
