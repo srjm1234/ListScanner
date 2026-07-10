@@ -1,0 +1,163 @@
+<mxfile host="app.diagrams.net" agent="Claude">
+  <diagram id="risk-1" name="风险分类决策树">
+    <mxGraphModel dx="1400" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="&lt;b&gt;check_risk() 风险分类决策树&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px;color:#666&quot;&gt;ListScanner — classifier.py 风险判定逻辑&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="300" y="15" width="600" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="root" value="check_risk(path)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="80" width="180" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="r_high" value="高风险判定" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#d32f2f;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="495" y="155" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="h1" value=".git/.svn?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="50" y="260" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="h2" value="backup/bak/old?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="190" y="260" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="h3" value=".env/.htaccess/\nweb.config/config?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="260" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="h4" value=".zip/.rar/\n.tar/.gz/.sql/db.?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="500" y="260" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="h5" value="含 admin?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="670" y="260" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="h6" value="含 manage?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="810" y="260" width="110" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="o1" value="源码泄露&#xa;高风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#888888;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="55" y="340" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="o2" value="备份文件&#xa;高风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#888888;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="340" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="o3" value="配置文件&#xa;高风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#888888;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="355" y="340" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="o4" value="压缩/数据库&#xa;高风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#888888;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="520" y="340" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="o5" value="后台入口&#xa;高风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#888888;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="675" y="340" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="o6" value="管理目录&#xa;高风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#888888;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="815" y="340" width="100" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="r_med" value="中风险判定" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#f57c00;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="170" y="430" width="140" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m1" value="含 login?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="50" y="530" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="m2" value="含 phpinfo?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="190" y="530" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="m3" value="日志文件?\nlog.txt/log./*.log" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="330" y="530" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="m4" value="含 test?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="490" y="530" width="110" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="o7" value="登录入口&#xa;中风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8e8e8;strokeColor=#777777;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="610" width="90" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="o8" value="环境信息&#xa;中风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8e8e8;strokeColor=#777777;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="610" width="90" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="o9" value="日志文件&#xa;中风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8e8e8;strokeColor=#777777;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="350" y="610" width="90" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="o10" value="测试文件&#xa;中风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8e8e8;strokeColor=#777777;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="500" y="610" width="90" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="r_low" value="低风险判定" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#388e3c;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="680" y="430" width="130" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="l1" value="以 / 结尾?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#444;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="640" y="530" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="o11" value="普通目录&#xa;低风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#555555;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="630" y="610" width="90" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="o12" value="普通文件&#xa;低风险" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#555555;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="780" y="530" width="90" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_root_high" style="strokeColor=#555;strokeWidth=1.5;" edge="1" source="root" target="r_high" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e_high_h1" value="1" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_high" target="h1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_high_h2" value="2" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_high" target="h2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_high_h3" value="3" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_high" target="h3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_high_h4" value="4" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_high" target="h4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_high_h5" value="5" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_high" target="h5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_high_h6" value="6" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_high" target="h6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e_h1_o1" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="h1" target="o1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_h2_o2" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="h2" target="o2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_h3_o3" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="h3" target="o3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_h4_o4" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="h4" target="o4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_h5_o5" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="h5" target="o5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_h6_o6" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="h6" target="o6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e_high_med" value="全部否" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="r_high" target="r_med" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e_med_m1" value="1" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_med" target="m1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_med_m2" value="2" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_med" target="m2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_med_m3" value="3" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_med" target="m3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_med_m4" value="4" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_med" target="m4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e_m1_o7" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="m1" target="o7" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_m2_o8" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="m2" target="o8" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_m3_o9" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="m3" target="o9" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_m4_o10" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="m4" target="o10" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e_med_low" value="全部否" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="r_med" target="r_low" parent="1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="630" y="460"/></Array></mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_low_l1" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_low" target="l1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_l1_o11" value="是" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="l1" target="o11" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_low_o12" value="否" style="strokeColor=#555;strokeWidth=1.5;fontSize=10;" edge="1" source="r_low" target="o12" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="leg1c" value="" style="rounded=1;fillColor=#e0e0e0;strokeColor=#888;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="700" width="14" height="14" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg1" value="高风险 — 可能导致敏感信息泄露或系统入侵（7条规则）" style="text;html=0;fontSize=11;color=#333;" vertex="1" parent="1">
+          <mxGeometry x="60" y="698" width="400" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg2c" value="" style="rounded=1;fillColor=#e8e8e8;strokeColor=#777;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="722" width="14" height="14" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg2" value="中风险 — 需要关注的安全问题（4条规则）" style="text;html=0;fontSize=11;color=#333;" vertex="1" parent="1">
+          <mxGeometry x="60" y="720" width="400" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg3c" value="" style="rounded=1;fillColor=#f0f0f0;strokeColor=#555;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="746" width="14" height="14" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg3" value="低风险 — 一般性信息（2条规则）" style="text;html=0;fontSize=11;color=#333;" vertex="1" parent="1">
+          <mxGeometry x="60" y="744" width="400" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="footer" value="ListScanner 毕业设计项目 — 风险分类决策树" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;color=#999999;" vertex="1" parent="1">
+          <mxGeometry x="300" y="790" width="600" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

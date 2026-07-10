@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-06-12" agent="Claude" version="21.0.0" type="device">
+  <diagram id="deploy-1" name="系统部署架构图">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="960" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        
+        <mxCell id="title" value="&lt;b&gt;系统部署架构图&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px;color:#666&quot;&gt;ListScanner — Browser/Server 三层架构&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="230" y="20" width="500" height="50" as="geometry"/>
+        </mxCell>
+
+        
+        <mxCell id="cluster_client" value="客户端 — 浏览器" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;strokeWidth=1.5;fontStyle=1;fontSize=13;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="90" width="280" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="browser" value="&lt;b&gt;浏览器&lt;/b&gt;&lt;br&gt;Chrome / Edge / Firefox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="80" y="130" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="html" value="&lt;b&gt;index.html&lt;/b&gt;&lt;br&gt;HTML + CSS + JS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="210" y="130" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_bh" style="strokeColor=#666666;" edge="1" source="browser" target="html" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        
+        <mxCell id="cluster_server" value="服务端 — Flask" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="240" width="440" height="220" as="geometry"/>
+        </mxCell>
+        <mxCell id="flask" value="&lt;b&gt;Flask Web 服务器&lt;/b&gt;&lt;br&gt;webapp.py :5000" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=1.5;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="80" y="280" width="160" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="api" value="&lt;b&gt;REST API 接口&lt;/b&gt;&lt;br&gt;/api/scan · /api/wordlists · /api/risk-info" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="260" y="280" width="220" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="scanner" value="&lt;b&gt;WebScanner&lt;/b&gt;&lt;br&gt;scanner.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="80" y="345" width="130" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="classifier" value="&lt;b&gt;check_risk()&lt;/b&gt;&lt;br&gt;classifier.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="220" y="345" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="wl_mod" value="&lt;b&gt;read_wordlist()&lt;/b&gt;&lt;br&gt;wordlist.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="350" y="345" width="130" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="report_mod" value="&lt;b&gt;save_html_report()&lt;/b&gt;&lt;br&gt;report.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="150" y="405" width="160" height="40" as="geometry"/>
+        </mxCell>
+
+        
+        <mxCell id="se1" style="strokeColor=#555555;" edge="1" source="flask" target="api" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se2" style="strokeColor=#555555;" edge="1" source="api" target="scanner" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se3" style="strokeColor=#555555;" edge="1" source="scanner" target="classifier" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se4" style="strokeColor=#555555;" edge="1" source="scanner" target="wl_mod" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        
+        <mxCell id="cluster_data" value="数据资源" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#888888;strokeWidth=1;fontStyle=1;fontSize=13;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="560" y="240" width="180" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="config_f" value="&lt;b&gt;config.ini&lt;/b&gt;&lt;br&gt;配置文件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#888888;strokeWidth=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="575" y="280" width="150" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="dict_f" value="&lt;b&gt;dictionary/*.txt&lt;/b&gt;&lt;br&gt;字典文件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#888888;strokeWidth=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="575" y="325" width="150" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="output_f" value="&lt;b&gt;report.html&lt;/b&gt;&lt;br&gt;扫描报告" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#888888;strokeWidth=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="575" y="370" width="150" height="35" as="geometry"/>
+        </mxCell>
+
+        
+        <mxCell id="cluster_target" value="外部目标" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#aaaaaa;strokeWidth=1;dashed=1;fontStyle=1;fontSize=13;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="560" y="420" width="180" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="website" value="&lt;b&gt;目标网站&lt;/b&gt;&lt;br&gt;HTTP 服务器" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#aaaaaa;strokeWidth=1;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="575" y="450" width="150" height="35" as="geometry"/>
+        </mxCell>
+
+        
+        <mxCell id="ce1" value="HTTP 请求" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="html" target="flask" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ce2" value="HTTP GET" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="scanner" target="website" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ce3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#888888;strokeWidth=1;" edge="1" source="config_f" target="flask" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ce4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#888888;strokeWidth=1;" edge="1" source="dict_f" target="wl_mod" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        
+        <mxCell id="footer" value="ListScanner 毕业设计项目 — 系统部署架构图" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;color=#999999;" vertex="1" parent="1">
+          <mxGeometry x="230" y="540" width="500" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

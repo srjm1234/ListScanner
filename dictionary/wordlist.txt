@@ -1,0 +1,37 @@
+# 常见目录
+admin/
+login/
+manage/
+system/
+api/
+upload/
+images/
+css/
+js/
+user/
+test/
+vulnerabilities/
+hackable/
+
+# 常见页面
+index.php
+login.php
+setup.php
+security.php
+instructions.php
+logout.php
+test.php
+phpinfo.php
+
+# 敏感文件
+.env
+.htaccess
+.git/config
+backup.zip
+backup.sql
+db.sql
+config.php
+config.php.bak
+web.config
+www.zip
+log.txt

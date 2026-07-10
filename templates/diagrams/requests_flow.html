@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>requests 库请求流程 - ListScanner</title>
+<style>
+  @page { size: A4 portrait; margin: 15mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    background: #fff; color: #1a1a2e;
+    padding: 40px; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .page-header {
+    text-align: center; margin-bottom: 32px; width: 100%; max-width: 960px;
+  }
+  .page-header h1 {
+    font-size: 22px; font-weight: 700; color: #1a1a2e;
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .page-header .subtitle {
+    font-size: 13px; color: #666;
+  }
+  .diagram-wrap {
+    background: #fff; border: 1.5px solid #d1d5db;
+    border-radius: 8px; padding: 32px; width: 100%; max-width: 960px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .diagram-wrap .mermaid { text-align: center; }
+  .code-ref {
+    margin-top: 24px; width: 100%; max-width: 960px;
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 20px 24px;
+  }
+  .code-ref h2 {
+    font-size: 14px; font-weight: 600; color: #1e293b;
+    margin-bottom: 12px;
+  }
+  .code-ref pre {
+    background: #1e293b; color: #e2e8f0;
+    padding: 16px; border-radius: 6px;
+    font-family: "JetBrains Mono", "Cascadia Code", monospace;
+    font-size: 12px; line-height: 1.7;
+    overflow-x: auto;
+  }
+  .code-ref pre .kw { color: #c084fc; }
+  .code-ref pre .fn { color: #60a5fa; }
+  .code-ref pre .str { color: #86efac; }
+  .code-ref pre .cmt { color: #64748b; }
+  .code-ref pre .exc { color: #fbbf24; }
+  .toolbar {
+    position: fixed; top: 16px; right: 16px;
+    display: flex; gap: 8px; z-index: 100;
+  }
+  .toolbar button {
+    padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 6px;
+    background: #fff; color: #374151; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .toolbar button:hover { background: #f3f4f6; border-color: #9ca3af; }
+  .toolbar button.primary { background: #333; color: #fff; border-color: #333; }
+  .toolbar button.primary:hover { background: #222; }
+  .footer {
+    margin-top: 24px; font-size: 11px; color: #9ca3af; text-align: center;
+  }
+  @media print {
+    body { padding: 0; }
+    .toolbar { display: none; }
+    .diagram-wrap, .code-ref { border: 1px solid #ccc; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button onclick="window.print()">打印 / 导出PDF</button>
+  <button class="primary" onclick="copyDiagram()">复制图表</button>
+</div>
+<div class="page-header">
+  <h1>requests 库 HTTP 请求流程</h1>
+  <div class="subtitle">ListScanner - scanner.py 中 requests.get() 的完整调用与异常处理流程</div>
+</div>
+<div class="diagram-wrap">
+  <div class="mermaid">
+sequenceDiagram
+    participant WS as WebScanner
+    participant CP as check_path()
+    participant REQ as requests 库
+    participant SS as 会话 / 适配器
+    participant DNS as DNS 解析
+    participant NET as 目标服务器
+
+    WS->>CP: check_path(path)
+    CP->>CP: url = urljoin(target_url, path)
+
+    rect rgb(235, 235, 235)
+        Note over CP,NET: requests.get() 请求流程
+        CP->>REQ: requests.get(url, timeout, headers, allow_redirects)
+        REQ->>REQ: 构建 Request 对象
+        REQ->>SS: Session.send(PreparedRequest)
+        SS->>SS: 创建 TCP 连接
+        SS->>DNS: 解析域名 → IP 地址
+        DNS-->>SS: 返回 IP
+        SS->>NET: 建立 TCP 连接 (三次握手)
+        NET-->>SS: 连接建立
+        SS->>NET: 发送 HTTP GET 请求
+        Note right of NET: GET /path HTTP/1.1<br/>Host: target<br/>User-Agent: ListScanner/2.0
+        NET-->>SS: 返回 HTTP 响应
+        Note left of SS: HTTP/1.1 status_code<br/>Content-Type<br/>Content-Length
+        SS-->>REQ: Response 对象
+        REQ-->>CP: response
+    end
+
+    alt 请求成功
+        CP->>CP: response.status_code == 404?
+        alt status == 404
+            CP-->>WS: (None, "not_found")
+        else status != 404
+            CP->>CP: check_risk(path) → (risk_type, risk_level)
+            CP->>CP: 构建 ScanResult(path, url, status_code, size, content_type, risk_type, risk_level)
+            CP-->>WS: (ScanResult, "found")
+        end
+    else requests.RequestException (超时/连接拒绝/DNS失败)
+        CP-->>WS: (None, "error")
+    end
+  </div>
+</div>
+
+<div class="code-ref">
+  <h2>对应源码 - scanner.py check_path()</h2>
+  <pre><span class="kw">def</span> <span class="fn">check_path</span>(self, path):
+    url = <span class="fn">urljoin</span>(self.target_url, path)
+
+    <span class="kw">try</span>:
+        response = <span class="fn">requests.get</span>(
+            url,
+            <span class="str">timeout</span>=self.timeout,
+            <span class="str">allow_redirects</span>=<span class="kw">False</span>,
+            <span class="str">headers</span>={<span class="str">"User-Agent"</span>: <span class="str">"ListScanner/2.0"</span>},
+        )
+    <span class="kw">except</span> <span class="exc">requests.RequestException</span>:
+        <span class="kw">return</span> <span class="kw">None</span>, <span class="str">"error"</span>
+
+    <span class="kw">if</span> response.status_code == <span class="str">404</span>:
+        <span class="kw">return</span> <span class="kw">None</span>, <span class="str">"not_found"</span>
+
+    risk_type, risk_level = <span class="fn">check_risk</span>(path)
+    result = <span class="fn">ScanResult</span>(
+        path=<span class="str">"/"</span> + path.<span class="fn">lstrip</span>(<span class="str">"/"</span>),
+        url=url,
+        status_code=response.status_code,
+        size=<span class="fn">len</span>(response.content),
+        content_type=response.headers.<span class="fn">get</span>(<span class="str">"Content-Type"</span>, <span class="str">""</span>),
+        risk_type=risk_type,
+        risk_level=risk_level,
+    )
+    <span class="kw">return</span> result, <span class="str">"found"</span></pre>
+</div>
+
+<div class="footer">ListScanner 毕业设计项目 - requests 库请求流程图</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#f5f5f5',
+    primaryTextColor: '#1a1a1a',
+    primaryBorderColor: '#555',
+    lineColor: '#555',
+    secondaryColor: '#f0f0f0',
+    tertiaryColor: '#f8f8f8',
+    noteBkgColor: '#f8f8f8',
+    noteTextColor: '#1a1a1a',
+    noteBorderColor: '#888',
+    actorTextColor: '#1a1a1a',
+    actorBkg: '#f5f5f5',
+    actorBorder: '#555',
+    fontFamily: '"Microsoft YaHei", Arial, sans-serif',
+    fontSize: '13px'
+  }
+});
+function copyDiagram() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const svgData = new XMLSerializer().serializeToString(svg);
+  navigator.clipboard.writeText(svgData).then(() => alert('SVG 已复制到剪贴板'));
+}
+</script>
+</body>
+</html>

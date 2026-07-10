@@ -1,0 +1,30 @@
+graph TB
+    subgraph 用户层
+        CLI["CLI 命令行<br/><i>cli.py</i>"]
+        WEB["WebUI 浏览器<br/><i>webapp.py + index.html</i>"]
+    end
+    subgraph 核心引擎
+        SCANNER["扫描器<br/><i>scanner.py</i><br/>WebScanner"]
+        CLASSIFIER["风险分类器<br/><i>classifier.py</i><br/>check_risk()"]
+        WORDLIST["字典处理器<br/><i>wordlist.py</i><br/>read_wordlist()"]
+    end
+    subgraph 数据层
+        MODELS["数据模型<br/><i>models.py</i><br/>ScanResult / ScanStats"]
+        CONFIG["配置管理<br/><i>config.py</i><br/>config.ini"]
+        REPORT["报告生成器<br/><i>report.py</i><br/>HTML Report"]
+    end
+    subgraph 外部资源
+        DICT["字典文件<br/>dictionary/*.txt"]
+        TARGET["目标网站<br/>HTTP Server"]
+    end
+
+    CLI --> SCANNER
+    WEB -->|REST API| SCANNER
+    SCANNER --> CLASSIFIER
+    SCANNER --> WORDLIST
+    WORDLIST --> DICT
+    SCANNER -->|HTTP GET| TARGET
+    SCANNER --> MODELS
+    REPORT --> MODELS
+    CONFIG --> CLI
+    CONFIG --> WEB

@@ -1,0 +1,27 @@
+classDiagram
+    class WebScanner {
+        +str target_url
+        +list wordlist
+        +int threads
+        +float timeout
+        +ScanStats stats
+        +scan() list
+        +check_path(path) tuple
+    }
+    class ScanResult {
+        +str path
+        +str url
+        +int status_code
+        +int size
+        +str content_type
+        +str risk_type
+        +str risk_level
+    }
+    class ScanStats {
+        +int total
+        +int found
+        +int not_found
+        +int errors
+    }
+    WebScanner --> ScanResult : 生成
+    WebScanner --> ScanStats : 记录

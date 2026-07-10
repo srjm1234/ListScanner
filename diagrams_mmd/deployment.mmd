@@ -1,0 +1,42 @@
+graph TB
+    subgraph CLIENT["客户端 — 浏览器"]
+        BROWSER["浏览器<br/>Chrome / Edge / Firefox"]
+        HTML["index.html<br/>HTML + CSS + JS"]
+        BROWSER --- HTML
+    end
+
+    subgraph SERVER["服务端 — Flask"]
+        FLASK["Flask Web 服务器<br/>webapp.py :5000"]
+        API["REST API 接口<br/>/api/scan · /api/wordlists<br/>/api/risk-info"]
+        SCANNER["WebScanner<br/>scanner.py"]
+        CLASSIFIER["check_risk()<br/>classifier.py"]
+        WORDLIST_M["read_wordlist()<br/>wordlist.py"]
+        REPORT["save_html_report()<br/>report.py"]
+        FLASK --- API
+        API --- SCANNER
+        SCANNER --- CLASSIFIER
+        SCANNER --- WORDLIST_M
+        SCANNER --- REPORT
+    end
+
+    subgraph DATA["数据资源"]
+        CONFIG["config.ini<br/>配置文件"]
+        DICT["dictionary/*.txt<br/>字典文件"]
+        OUTPUT["report.html<br/>扫描报告"]
+    end
+
+    subgraph TARGET["外部目标"]
+        WEBSITE["目标网站<br/>HTTP 服务器"]
+    end
+
+    HTML -->|"HTTP 请求<br/>REST API"| FLASK
+    FLASK -->|"JSON 响应"| HTML
+    SCANNER -->|"HTTP GET"| WEBSITE
+    CONFIG --> FLASK
+    DICT --> WORDLIST_M
+    REPORT --> OUTPUT
+
+    style CLIENT fill:#f0f0f0,stroke:#666,stroke-width:1.5px
+    style SERVER fill:#f5f5f5,stroke:#333,stroke-width:2px
+    style DATA fill:#fafafa,stroke:#888,stroke-width:1px
+    style TARGET fill:#fff,stroke:#aaa,stroke-width:1px,stroke-dasharray:5 5

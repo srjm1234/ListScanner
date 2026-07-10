@@ -1,0 +1,3244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ListScanner WebUI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-card: #111827;
+      --bg-hover: #1a2332;
+      --bg-input: #0d1117;
+      --border: #1e293b;
+      --border-focus: #00d4ff;
+      --text: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #475569;
+      --primary: #00d4ff;
+      --primary-light: rgba(0,212,255,0.1);
+      --primary-dark: #00a8cc;
+      --green: #00ff88;
+      --green-light: rgba(0,255,136,0.1);
+      --red: #ff4757;
+      --red-light: rgba(255,71,87,0.12);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 15px rgba(0,0,0,0.5), 0 0 20px rgba(0,212,255,0.05);
+      --radius: 8px;
+      --radius-sm: 6px;
+      --font: "Microsoft YaHei", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", monospace;
+      --transition: 150ms ease;
+      /* HUD */
+      --hud-glow: rgba(0,212,255,0.4);
+      --hud-line: rgba(0,212,255,0.25);
+    }
+
+    /* ===== LIGHT THEME ===== */
+    body.light-theme {
+      --bg: #f0f4f8;
+      --bg-card: #ffffff;
+      --bg-hover: #e8ecf1;
+      --bg-input: #ffffff;
+      --border: #d0d7e0;
+      --border-focus: #0091b3;
+      --text: #1a2332;
+      --text-secondary: #4a5568;
+      --text-muted: #8896a6;
+      --primary: #0091b3;
+      --primary-light: rgba(0,145,179,0.08);
+      --primary-dark: #007a99;
+      --green: #00c96b;
+      --green-light: rgba(0,201,107,0.08);
+      --red: #e53e3e;
+      --red-light: rgba(229,62,62,0.08);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 15px rgba(0,0,0,0.12);
+      --hud-glow: rgba(0,145,179,0.3);
+      --hud-line: rgba(0,145,179,0.2);
+    }
+    body.light-theme { background: var(--bg); color: var(--text); }
+    body.light-theme .header { background: #ffffff !important; box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important; }
+    body.light-theme .header::after { background: linear-gradient(90deg, transparent, #0091b3, #00c96b, #0091b3, transparent) !important; }
+    body.light-theme .logo-text, body.light-theme .logo-text span { color: #1a2332 !important; text-shadow: none !important; }
+    body.light-theme .logo-text span { color: #0091b3 !important; }
+    body.light-theme .logo-ver { color: #0091b3 !important; border-color: rgba(0,145,179,0.3) !important; text-shadow: none !important; }
+    body.light-theme .logo-icon { background: linear-gradient(135deg, #0091b3, #00c96b) !important; box-shadow: 0 0 8px rgba(0,145,179,0.2) !important; }
+    body.light-theme .header-right { color: #8896a6 !important; }
+    body.light-theme .header-right a { color: #0091b3 !important; }
+    body.light-theme .sidebar { background: #ffffff !important; }
+    body.light-theme .sidebar::after { background: linear-gradient(180deg, transparent, rgba(0,145,179,0.2), rgba(0,201,107,0.15), rgba(0,145,179,0.2), transparent) !important; }
+    body.light-theme .sidebar-fixed { background: #f8fafc !important; }
+    body.light-theme input, body.light-theme select, body.light-theme textarea { background-color: #ffffff !important; border-color: #d0d7e0 !important; color: #1a2332 !important; }
+    body.light-theme input:focus, body.light-theme select:focus, body.light-theme textarea:focus { border-color: #0091b3 !important; box-shadow: 0 0 0 3px rgba(0,145,179,0.1) !important; }
+    body.light-theme .btn { background: #f0f4f8 !important; border-color: #d0d7e0 !important; color: #4a5568 !important; }
+    body.light-theme .btn-icon { background: #f0f4f8 !important; border-color: #d0d7e0 !important; color: #8896a6 !important; }
+    body.light-theme .btn-icon:hover { border-color: #0091b3 !important; color: #0091b3 !important; }
+    body.light-theme .ext-tag { background: #f0f4f8 !important; border-color: #d0d7e0 !important; color: #4a5568 !important; }
+    body.light-theme .ext-tag.active { border-color: #0091b3 !important; color: #0091b3 !important; background: rgba(0,145,179,0.06) !important; }
+    body.light-theme .slider-row input[type="range"] { background: #d0d7e0 !important; }
+    body.light-theme .slider-row input[type="range"]::-webkit-slider-thumb { background: #0091b3 !important; box-shadow: 0 0 6px rgba(0,145,179,0.3) !important; }
+    body.light-theme .slider-val { color: #0091b3 !important; text-shadow: none !important; }
+    body.light-theme .btn-scan { background: linear-gradient(135deg, #007a99, #0091b3, #007a99) !important; }
+    body.light-theme .btn-scan:hover { box-shadow: 0 0 20px rgba(0,145,179,0.3) !important; }
+    body.light-theme .main { background: #f0f4f8 !important; }
+    body.light-theme .main-tabs { background: #ffffff !important; }
+    body.light-theme .main-tab { color: #8896a6 !important; }
+    body.light-theme .main-tab.active { color: #0091b3 !important; }
+    body.light-theme .main-tab.active::after { background: linear-gradient(90deg, #0091b3, #00c96b, #0091b3) !important; box-shadow: 0 0 8px rgba(0,145,179,0.3) !important; }
+    body.light-theme .cfg-section:hover { border-left-color: rgba(0,145,179,0.4) !important; }
+    body.light-theme .cfg-step { background: rgba(0,145,179,0.08) !important; border-color: rgba(0,145,179,0.4) !important; color: #0091b3 !important; text-shadow: none !important; }
+    body.light-theme .cfg-title { color: #1a2332 !important; }
+    body.light-theme .cfg-desc { color: #4a5568 !important; }
+    body.light-theme .cfg-desc code { color: #0091b3 !important; background: rgba(0,145,179,0.06) !important; }
+    /* scan workbench — hardcoded colors, override directly */
+    body.light-theme .progress-panel { background: #ffffff !important; }
+    body.light-theme .progress-panel::before { border-color: #d0d7e0 !important; }
+    body.light-theme .progress-panel::after { background: linear-gradient(90deg, transparent, #0091b3, #00c96b, #0091b3, transparent) !important; }
+    body.light-theme .progress-track { background: #e0e6ec !important; }
+    body.light-theme .progress-fill { background: linear-gradient(90deg, #007a99, #0091b3, #00c96b, #0091b3, #007a99) !important; }
+    body.light-theme .progress-status.running { color: #0091b3 !important; }
+    body.light-theme .progress-status.running .dot { background: #0091b3 !important; }
+    body.light-theme .progress-status.done { color: #00c96b !important; }
+    body.light-theme .progress-status.done .dot { background: #00c96b !important; }
+    body.light-theme .progress-pct { color: #0091b3 !important; }
+    body.light-theme .stat-cell { background: #f8fafc !important; }
+    body.light-theme .stat-cell::before { border-color: #d0d7e0 !important; }
+    body.light-theme .stat-cell.s-total .stat-val { color: #0091b3 !important; }
+    body.light-theme .stat-cell.s-found .stat-val { color: #00c96b !important; }
+    body.light-theme .stat-cell.s-high .stat-val { color: #e53e3e !important; }
+    body.light-theme .stat-cell.s-err .stat-val { color: #dd6b20 !important; }
+    /* terminal is always dark — no light-theme overrides needed */
+    body.light-theme .results-panel { background: #ffffff !important; }
+    body.light-theme .results-panel::before { border-color: #d0d7e0 !important; }
+    body.light-theme .results-panel::after { background: linear-gradient(90deg, transparent, #0091b3, #00c96b, #0091b3, transparent) !important; }
+    body.light-theme .results-bar { border-bottom-color: #e0e6ec !important; }
+    body.light-theme .results-bar h2 { color: #1a2332 !important; }
+    body.light-theme .results-bar h2 svg { color: #0091b3 !important; }
+    body.light-theme .chip { border-color: #d0d7e0 !important; color: #8896a6 !important; background: #ffffff !important; }
+    body.light-theme .chip:hover { border-color: #0091b3 !important; color: #0091b3 !important; }
+    body.light-theme .chip.active { border-color: #0091b3 !important; color: #0091b3 !important; background: rgba(0,145,179,0.06) !important; }
+    body.light-theme .data-table th { background: #f0f4f8 !important; color: #8896a6 !important; }
+    body.light-theme .data-table tbody tr:hover { background: rgba(0,145,179,0.03) !important; }
+    body.light-theme .data-table a { color: #0091b3 !important; }
+    body.light-theme .badge-high { color: #e53e3e !important; background: rgba(229,62,62,0.08) !important; }
+    body.light-theme .badge-med { color: #dd6b20 !important; background: rgba(221,107,32,0.08) !important; }
+    body.light-theme .badge-low { color: #00c96b !important; background: rgba(0,201,107,0.08) !important; }
+    body.light-theme .risk-guide { background: #ffffff !important; }
+    body.light-theme .risk-guide::before { border-color: #d0d7e0 !important; }
+    body.light-theme .risk-guide::after { background: linear-gradient(90deg, transparent, #0091b3, #00c96b, transparent) !important; }
+    body.light-theme .risk-guide h2 { color: #1a2332 !important; }
+    body.light-theme .risk-guide h2 svg { color: #0091b3 !important; }
+    body.light-theme .export-panel { background: #ffffff !important; }
+    body.light-theme .export-panel::before { border-color: #d0d7e0 !important; }
+    body.light-theme .export-panel::after { background: linear-gradient(90deg, transparent, #0091b3, #00c96b, #0091b3, transparent) !important; }
+    body.light-theme .export-title { color: #4a5568 !important; }
+    body.light-theme .export-title svg { color: #0091b3 !important; }
+    body.light-theme .export-title span { color: #0091b3 !important; }
+    body.light-theme .export-btn { background: #f8fafc !important; }
+    body.light-theme .export-btn::before { border-color: #d0d7e0 !important; }
+    body.light-theme .export-btn::after { background: rgba(0,145,179,0.2) !important; }
+    body.light-theme .export-btn:hover::before { border-color: #0091b3 !important; }
+    body.light-theme .export-btn:hover::after { background: #0091b3 !important; }
+    body.light-theme .export-btn .eb-label { color: #1a2332 !important; }
+    body.light-theme .export-btn:hover .eb-label { color: #0091b3 !important; }
+    body.light-theme .export-btn .eb-hint { color: #8896a6 !important; }
+    body.light-theme .export-btn.e-html .eb-icon { background: rgba(0,145,179,0.08) !important; color: #0091b3 !important; }
+    body.light-theme .export-btn.e-csv .eb-icon { background: rgba(0,201,107,0.08) !important; color: #00c96b !important; }
+    body.light-theme .export-btn.e-json .eb-icon { background: rgba(217,119,6,0.08) !important; color: #d97706 !important; }
+    body.light-theme .risk-group { background: #f0f4f8 !important; }
+    body.light-theme .risk-group::before { border-color: #d0d7e0 !important; }
+    body.light-theme .risk-group:hover::before { border-color: #0091b3 !important; }
+    body.light-theme .risk-group-level.lv-high { color: #e53e3e !important; background: rgba(229,62,62,0.08) !important; }
+    body.light-theme .risk-group-level.lv-med { color: #dd6b20 !important; background: rgba(221,107,32,0.08) !important; }
+    body.light-theme .risk-group-level.lv-low { color: #00c96b !important; background: rgba(0,201,107,0.08) !important; }
+    body.light-theme .risk-group .toggle-arrow { color: #8896a6 !important; }
+    body.light-theme .diagram-link-card { background: #ffffff !important; }
+    body.light-theme .diagram-link-card::before { border-color: #d0d7e0 !important; }
+    body.light-theme .diagram-link-card:hover::before { border-color: #0091b3 !important; box-shadow: inset 0 0 15px rgba(0,145,179,0.2) !important; }
+    body.light-theme .diagram-link-card h3 { color: #1a2332 !important; }
+    body.light-theme .diagram-link-card:hover h3 { color: #0091b3 !important; }
+    body.light-theme .diagram-link-card p { color: #8896a6 !important; }
+    body.light-theme .empty-state .icon-circle { background: rgba(0,145,179,0.06) !important; border-color: rgba(0,145,179,0.15) !important; }
+    body.light-theme .empty-state .icon-circle svg { color: #0091b3 !important; }
+    body.light-theme .empty-state h2 { color: #1a2332 !important; }
+    body.light-theme .empty-state p { color: #4a5568 !important; }
+    body.light-theme .toast.success { background: rgba(0,201,107,0.1) !important; color: #008a4a !important; }
+    body.light-theme .toast.error { background: rgba(229,62,62,0.1) !important; color: #c53030 !important; }
+    body.light-theme .modal { background: #ffffff !important; }
+    body.light-theme .modal::before { border-color: #d0d7e0 !important; }
+    body.light-theme .modal h3 { color: #1a2332 !important; }
+    body.light-theme #testsiteBtn { background: #f0f4f8 !important; border-color: #d0d7e0 !important; color: #0091b3 !important; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 15px; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: var(--shadow-sm);
+    }
+    .header::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), var(--green), var(--primary), transparent);
+      animation: headerGlow 3s linear infinite;
+    }
+    @keyframes headerGlow {
+      0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; }
+    }
+    .logo-group { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--primary), var(--green));
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: #000;
+      box-shadow: 0 0 15px var(--hud-glow);
+    }
+    .logo-text {
+      font-size: 16px; font-weight: 700;
+      color: var(--text);
+      letter-spacing: 1px;
+      font-family: var(--font-mono);
+    }
+    .logo-text span { color: var(--primary); text-shadow: 0 0 10px var(--hud-glow); }
+    .logo-ver {
+      font-family: var(--font-mono);
+      font-size: 11px; color: var(--primary);
+      border: 1px solid var(--hud-line);
+      padding: 2px 8px; border-radius: 4px;
+      text-shadow: 0 0 8px var(--hud-glow);
+    }
+    .header-right {
+      font-size: 13px; color: var(--text-muted);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .header-right a {
+      color: var(--primary); text-decoration: none;
+      font-size: 13px; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .header-right a:hover { text-shadow: 0 0 8px var(--hud-glow); }
+
+    /* Layout */
+    .container {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      height: calc(100vh - 56px);
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .sidebar::after {
+      content: '';
+      position: absolute; top: 0; right: 0;
+      width: 1px; height: 100%;
+      background: linear-gradient(180deg, transparent, var(--hud-glow), rgba(0,255,136,0.15), var(--hud-glow), transparent);
+      animation: sidebarGlow 3s ease-in-out infinite;
+    }
+    @keyframes sidebarGlow { 0%,100%{opacity:0.4} 50%{opacity:1} }
+    .sidebar-scroll {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .sidebar-scroll::-webkit-scrollbar { width: 5px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    .sidebar-fixed {
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      padding: 16px 20px;
+      background: var(--bg-card);
+    }
+
+    /* Config sections */
+    .cfg-section {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      transition: background var(--transition), border-left 0.3s;
+      border-left: 3px solid transparent;
+    }
+    .cfg-section:hover {
+      background: var(--bg-hover);
+      border-left-color: rgba(0,212,255,0.4);
+    }
+    .cfg-section:last-child { border-bottom: none; }
+    .cfg-head {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .cfg-step {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      border: 1.5px solid var(--hud-line);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 12px; font-weight: 700;
+      color: var(--primary);
+      flex-shrink: 0;
+      transition: all 0.3s;
+      text-shadow: 0 0 6px var(--hud-glow);
+    }
+    .cfg-section:hover .cfg-step {
+      transform: scale(1.15);
+      box-shadow: 0 0 15px var(--hud-glow);
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+    .cfg-title {
+      font-size: 14px; font-weight: 600;
+      color: var(--text);
+    }
+    .cfg-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 12px;
+      padding-left: 36px;
+    }
+    .cfg-desc code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 1px 6px; border-radius: 3px;
+      border: 1px solid var(--hud-line);
+    }
+    .cfg-body { padding-left: 36px; }
+
+    /* Form controls — unified */
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 9px 12px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    input::placeholder, textarea::placeholder { color: var(--text-muted); }
+    textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--primary-light), 0 0 12px rgba(0,212,255,0.06);
+    }
+
+    /* Select — custom arrow, same bg as inputs */
+    select {
+      cursor: pointer;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      padding-right: 32px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    select:focus { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2300d4ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
+    select option {
+      background: var(--bg-card);
+      color: var(--text);
+    }
+
+    /* Wordlist bar */
+    .wl-bar { display: flex; gap: 8px; margin-bottom: 8px; }
+    .wl-bar select { flex: 1; }
+    .btn-icon {
+      width: 38px; height: 38px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+    .btn-icon:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 0 10px var(--hud-glow);
+    }
+    .btn-icon:active { transform: scale(0.95); }
+    .btn-icon svg { width: 18px; height: 18px; }
+
+    .wl-editor {
+      display: none;
+      animation: slideDown 200ms ease;
+    }
+    .wl-editor.show { display: block; }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .wl-editor-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+    /* Extension tags */
+    .ext-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .ext-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      user-select: none;
+      display: inline-flex; align-items: center;
+    }
+    .ext-tag.active {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+      font-weight: 600;
+      box-shadow: 0 0 8px var(--hud-glow);
+    }
+    .ext-tag:hover { border-color: var(--text-muted); }
+    .ext-tag:active { transform: scale(0.95); }
+    .ext-input-row { display: flex; gap: 6px; }
+    .ext-input-row input { flex: 1; }
+
+    /* Slider */
+    .slider-row { display: flex; align-items: center; gap: 12px; }
+    .slider-row input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      outline: none; border: none; padding: 0;
+    }
+    .slider-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--hud-glow);
+      transition: transform var(--transition);
+    }
+    .slider-row input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 15px var(--hud-glow);
+    }
+    .slider-val {
+      font-family: var(--font-mono);
+      font-size: 15px; font-weight: 700;
+      color: var(--primary);
+      min-width: 36px; text-align: center;
+      text-shadow: 0 0 8px var(--hud-glow);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 9px 16px;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px;
+      background: var(--bg-input);
+      color: var(--text-secondary);
+    }
+    .btn:hover { border-color: var(--text-muted); color: var(--text); }
+    .btn:active { transform: scale(0.97); }
+    .btn svg { width: 16px; height: 16px; }
+
+    .btn-scan {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--primary-dark));
+      background-size: 200% 200%;
+      animation: scanBtnPulse 2s ease-in-out infinite;
+      color: #fff;
+      font-size: 14px; font-weight: 700;
+      font-family: var(--font-mono);
+      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+      letter-spacing: 2px;
+      border-radius: var(--radius);
+      position: relative; overflow: hidden;
+      text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    }
+    @keyframes scanBtnPulse {
+      0%,100% { box-shadow: 0 0 15px var(--hud-glow), 0 0 30px rgba(0,212,255,0.1); }
+      50% { box-shadow: 0 0 25px var(--hud-glow), 0 0 50px rgba(0,212,255,0.2); }
+    }
+    .btn-scan:hover {
+      background-position: 100% 0;
+      box-shadow: 0 0 30px var(--hud-glow), 0 0 60px rgba(0,212,255,0.2) !important;
+      transform: translateY(-2px);
+    }
+    .btn-scan:disabled {
+      opacity: 0.4; cursor: not-allowed;
+      background: var(--border);
+      animation: none;
+      box-shadow: none;
+    }
+    .btn-scan:disabled:active { transform: none; }
+    .btn-scan svg { width: 18px; height: 18px; }
+    .btn-scan .ripple {
+      position: absolute; top: 50%; left: 50%;
+      width: 0; height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .btn-scan .ripple.active {
+      animation: rippleEffect 0.6s ease-out forwards;
+    }
+    @keyframes rippleEffect {
+      0% { width: 0; height: 0; opacity: 1; }
+      100% { width: 300px; height: 300px; opacity: 0; }
+    }
+
+    .btn-sm {
+      padding: 7px 14px;
+      font-size: 12px;
+    }
+    .btn-sm.primary {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+    .btn-sm.primary:hover { background: var(--primary-light); border-color: var(--primary); box-shadow: 0 0 8px var(--hud-glow); }
+
+    /* Main tabs */
+    .main-tabs {
+      display: flex; gap: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      background: var(--bg-card);
+    }
+    .main-tab {
+      padding: 12px 20px;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .main-tab:hover { color: var(--text-secondary); }
+    .main-tab.active {
+      color: var(--primary);
+      border-bottom: none;
+      font-weight: 600;
+      position: relative;
+    }
+    .main-tab.active::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--green), var(--primary));
+      background-size: 300% 100%;
+      animation: gradientSlide 2s linear infinite;
+      box-shadow: 0 0 10px rgba(0,212,255,0.5);
+    }
+    @keyframes gradientSlide { 0%{background-position:0% 50%} 100%{background-position:300% 50%} }
+    .main-tab svg { width: 16px; height: 16px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Main area */
+    .main { overflow-y: auto; background: var(--bg); min-height: 0; }
+    .main-inner { padding: 24px; }
+    .main::-webkit-scrollbar { width: 5px; }
+    .main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .main::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* Diagram links */
+    .diagram-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .diagram-link-card {
+      background: var(--bg-card);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      position: relative;
+      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+    }
+    .diagram-link-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+      border: 1.5px solid var(--border);
+      pointer-events: none; z-index: 2;
+    }
+    .diagram-link-card:hover::before {
+      border-color: var(--primary);
+      box-shadow: inset 0 0 15px var(--hud-glow);
+    }
+    .diagram-link-card::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--hud-line), transparent);
+    }
+    .diagram-link-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 20px var(--hud-glow);
+      transform: translateY(-4px);
+    }
+    .diagram-link-card.full { grid-column: 1 / -1; }
+    .diagram-link-card .card-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .diagram-link-card:hover .card-icon {
+      transform: scale(1.1) rotate(-3deg);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .diagram-link-card .card-icon svg { width: 22px; height: 22px; }
+    .diagram-link-card h3 {
+      font-size: 14px; font-weight: 600;
+      color: var(--text); margin-bottom: 4px;
+      transition: color 0.2s;
+    }
+    .diagram-link-card:hover h3 { color: var(--primary); }
+    .diagram-link-card p {
+      font-size: 12px; color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .diagram-link-card .tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--primary);
+      background: var(--primary-light);
+      border: 1px solid var(--hud-line);
+      padding: 2px 8px; border-radius: 3px;
+      margin-top: 8px;
+    }
+
+    /* ===== SCAN WORKBENCH — full rewrite ===== */
+
+    /* Empty state */
+    .empty-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 65vh; text-align: center;
+    }
+    .empty-state .icon-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      border: 1px solid var(--hud-line);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      animation: iconFloat 3s ease-in-out infinite;
+      box-shadow: 0 0 25px var(--hud-glow);
+    }
+    @keyframes iconFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .empty-state .icon-circle svg { width: 36px; height: 36px; color: var(--primary); }
+    .empty-state h2 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; color: var(--text-secondary); max-width: 400px; line-height: 1.7; }
+    .empty-state .hint { margin-top: 20px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+
+    /* Dashboard */
+    .dashboard { display: none; animation: slideDown 300ms ease; }
+    .dashboard.show { display: block; }
+
+    /* Progress panel — HUD */
+    .progress-panel {
+      background: var(--bg-card);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+    }
+    .progress-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+      border: 1.5px solid var(--border);
+      pointer-events: none; z-index: 2;
+    }
+    .progress-panel::after {
+      content: '';
+      position: absolute; top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), var(--green), var(--primary), transparent);
+      z-index: 5;
+    }
+    .progress-head {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 12px;
+    }
+    .progress-status {
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .progress-status .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+    .progress-status.running .dot {
+      background: var(--primary);
+      animation: pulse 1.2s ease infinite;
+    }
+    .progress-status.running { color: var(--primary); }
+    .progress-status.done .dot { background: var(--green); }
+    .progress-status.done { color: var(--green); }
+    @keyframes pulse {
+      0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)}
+    }
+    .progress-pct {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 15px; font-weight: 700;
+      color: var(--text-muted);
+    }
+    .progress-track {
+      width: 100%; height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+    .progress-fill {
+      height: 100%; width: 0%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+      transition: width 300ms ease;
+    }
+
+    /* Stat grid */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .stat-cell {
+      background: var(--bg);
+      padding: 14px 12px;
+      text-align: center;
+      transition: all 0.2s;
+      position: relative;
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+    }
+    .stat-cell::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+      border: 1px solid var(--border);
+      pointer-events: none; z-index: 1;
+    }
+    .stat-cell:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--hud-glow); }
+    .stat-cell:hover::before { border-color: var(--primary); }
+    .stat-val {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 24px; font-weight: 700;
+    }
+    .stat-name {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .stat-cell.s-total .stat-val { color: var(--primary); }
+    .stat-cell.s-found .stat-val { color: var(--green); }
+    .stat-cell.s-high .stat-val { color: var(--red); }
+    .stat-cell.s-err .stat-val { color: #d97706; }
+
+    /* Terminal log — always dark, hardcoded colors */
+    .terminal {
+      background: #0d1117;
+      margin-bottom: 16px;
+      overflow: hidden;
+      display: none;
+      position: relative;
+      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+    }
+    .terminal::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+      border: 1px solid #1e293b;
+      pointer-events: none; z-index: 3;
+    }
+    .terminal.show { display: block; animation: slideDown 200ms ease; }
+    .terminal-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px;
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+    }
+    .terminal-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 1.5s ease infinite;
+    }
+    .terminal-title {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px; color: #94a3b8;
+      letter-spacing: 0.5px;
+    }
+    .terminal-body {
+      padding: 10px 14px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px; line-height: 1.9;
+      color: #e2e8f0;
+    }
+    .terminal-body::-webkit-scrollbar { width: 3px; }
+    .terminal-body::-webkit-scrollbar-thumb { background: #2d3a4a; }
+    .log-line {
+      display: flex; gap: 10px; align-items: baseline;
+      animation: logIn 200ms ease;
+    }
+    @keyframes logIn {
+      from { opacity: 0; transform: translateX(-6px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .log-time { color: #475569; font-size: 11px; flex-shrink: 0; }
+    .log-code { font-weight: 600; min-width: 28px; }
+    .log-code.c2xx { color: #4ade80; }
+    .log-code.c3xx { color: #60a5fa; }
+    .log-code.c4xx { color: #fbbf24; }
+    .log-code.c5xx { color: #f87171; }
+    .log-url { color: #e2e8f0; word-break: break-all; }
+    .log-tag {
+      font-size: 11px; padding: 0 6px;
+      border-radius: 3px; font-weight: 500; flex-shrink: 0;
+    }
+    .log-tag.t-high { color: #fca5a5; background: rgba(239,68,68,0.15); }
+    .log-tag.t-med { color: #fcd34d; background: rgba(245,158,11,0.15); }
+    .log-tag.t-low { color: #86efac; background: rgba(34,197,94,0.15); }
+
+    /* Results table */
+    .results-panel {
+      background: var(--bg-card);
+      overflow: hidden;
+      display: none;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+    }
+    .results-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+      border: 1.5px solid var(--border);
+      pointer-events: none; z-index: 2;
+    }
+    .results-panel::after {
+      content: '';
+      position: absolute; top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), var(--green), var(--primary), transparent);
+      z-index: 5;
+    }
+    .results-panel.show { display: block; animation: slideDown 300ms ease; }
+    .results-bar {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      position: relative; z-index: 10;
+    }
+    .results-bar h2 {
+      font-size: 14px; font-weight: 600;
+      color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .results-bar h2 svg { width: 18px; height: 18px; color: var(--primary); }
+    .filter-chips { display: flex; gap: 6px; }
+    .chip {
+      padding: 5px 14px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 12px; font-weight: 500;
+      cursor: pointer;
+      transition: all 150ms ease;
+      position: relative; z-index: 10;
+      clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+    }
+    .chip:hover { border-color: var(--primary); color: var(--primary); }
+    .chip:active { transform: scale(0.95); }
+    .chip.active {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+    .table-wrap { max-height: 400px; overflow-y: auto; position: relative; z-index: 5; }
+    .table-wrap::-webkit-scrollbar { width: 4px; }
+    .table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 12px; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 2;
+    }
+    .data-table td {
+      padding: 10px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--bg);
+      font-family: "JetBrains Mono", monospace;
+    }
+    .data-table tbody tr { transition: background 150ms ease; }
+    .data-table tbody tr:hover { background: var(--primary-light); }
+    .data-table a {
+      color: var(--primary);
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .data-table a:hover { text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-high { color: var(--red); background: var(--red-light); }
+    .badge-med { color: #d97706; background: rgba(217,119,6,0.1); }
+    .badge-low { color: var(--green); background: var(--green-light); }
+
+    /* Export panel — HUD */
+    .export-panel {
+      background: var(--bg-card);
+      padding: 20px;
+      margin: 16px 0;
+      position: relative;
+      clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+    }
+    .export-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+      border: 1.5px solid var(--border);
+      pointer-events: none; z-index: 2;
+    }
+    .export-panel::after {
+      content: '';
+      position: absolute; top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), var(--green), var(--primary), transparent);
+      z-index: 5;
+    }
+    .export-title {
+      font-size: 13px; font-weight: 600;
+      color: var(--text-secondary);
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .export-title svg { width: 16px; height: 16px; color: var(--primary); }
+    .export-title span { color: var(--primary); font-family: var(--font-mono); font-size: 11px; }
+    .export-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .export-btn {
+      position: relative;
+      background: var(--bg);
+      padding: 16px 12px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      text-align: center;
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+    }
+    .export-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+      border: 1px solid var(--border);
+      pointer-events: none; z-index: 1;
+    }
+    .export-btn::after {
+      content: '';
+      position: absolute; top: 0; left: 15%; right: 15%;
+      height: 1px;
+      background: var(--hud-line);
+      z-index: 3;
+      transition: background 0.25s;
+    }
+    .export-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3), 0 0 15px var(--hud-glow);
+    }
+    .export-btn:hover::before { border-color: var(--primary); }
+    .export-btn:hover::after { background: var(--primary); box-shadow: 0 0 8px var(--hud-glow); }
+    .export-btn .eb-icon {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .export-btn:hover .eb-icon { transform: scale(1.12); box-shadow: 0 0 12px var(--hud-glow); }
+    .export-btn .eb-icon svg { width: 18px; height: 18px; }
+    .export-btn .eb-label {
+      font-size: 13px; font-weight: 600;
+      color: var(--text);
+      transition: color 0.2s;
+    }
+    .export-btn:hover .eb-label { color: var(--primary); }
+    .export-btn .eb-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .export-btn.e-html .eb-icon { background: var(--primary-light); color: var(--primary); }
+    .export-btn.e-csv .eb-icon { background: var(--green-light); color: var(--green); }
+    .export-btn.e-json .eb-icon { background: rgba(217,119,6,0.1); color: #d97706; }
+    .export-btn:active { transform: scale(0.97); }
+
+    /* Risk guide */
+    .risk-guide {
+      background: var(--bg-card);
+      padding: 20px;
+      margin-top: 16px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+    }
+    .risk-guide::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+      border: 1.5px solid var(--border);
+      pointer-events: none; z-index: 2;
+    }
+    .risk-guide::after {
+      content: '';
+      position: absolute; top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), var(--green), var(--primary), transparent);
+      z-index: 5;
+    }
+    .risk-guide h2 {
+      font-size: 14px; font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .risk-guide h2 svg { width: 18px; height: 18px; color: var(--primary); }
+    .risk-group {
+      margin-bottom: 10px;
+      padding: 14px 16px;
+      background: var(--bg);
+      transition: all 0.2s;
+      cursor: pointer;
+      position: relative;
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+    }
+    .risk-group::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+      border: 1px solid var(--border);
+      pointer-events: none;
+    }
+    .risk-group:hover::before { border-color: var(--text-muted); }
+    .risk-group:last-child { margin-bottom: 0; }
+    .risk-group-head {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .risk-group-level {
+      font-size: 12px; font-weight: 700;
+      padding: 2px 10px; border-radius: 3px;
+    }
+    .risk-group-level.lv-high { color: var(--red); background: var(--red-light); }
+    .risk-group-level.lv-med { color: #d97706; background: rgba(217,119,6,0.1); }
+    .risk-group-level.lv-low { color: var(--green); background: var(--green-light); }
+    .risk-group-desc {
+      font-size: 13px; color: var(--text-secondary);
+      margin: 8px 0 10px;
+    }
+    .risk-group-body {
+      display: none;
+      animation: slideDown 200ms ease;
+    }
+    .risk-group.open .risk-group-body { display: block; }
+    .risk-items {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 16px;
+    }
+    .risk-items li {
+      font-size: 12px; color: var(--text-secondary);
+      display: flex; align-items: flex-start;
+      gap: 6px; line-height: 1.5;
+    }
+    .risk-items li .dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      margin-top: 6px; flex-shrink: 0;
+    }
+    .risk-group.r-high .dot { background: var(--red); }
+    .risk-group.r-med .dot { background: #d97706; }
+    .risk-group.r-low .dot { background: var(--green); }
+    .risk-group .toggle-arrow {
+      margin-left: auto; color: var(--text-muted);
+      transition: transform 0.2s;
+      display: flex; align-items: center;
+    }
+    .risk-group .toggle-arrow svg { width: 16px; height: 16px; }
+    .risk-group.open .toggle-arrow { transform: rotate(180deg); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      padding: 12px 20px;
+      font-size: 13px; font-weight: 500;
+      z-index: 100;
+      animation: toastIn 200ms ease;
+      display: none;
+      align-items: center; gap: 8px;
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+      box-shadow: var(--shadow-md);
+    }
+    .toast.show { display: flex; }
+    .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .toast.success { background: var(--green-light); border: 1px solid rgba(0,255,136,0.2); color: var(--green); }
+    .toast.error { background: var(--red-light); border: 1px solid rgba(255,71,87,0.2); color: var(--red); }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 60;
+      display: none;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--bg-card);
+      padding: 24px;
+      width: 380px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px var(--hud-glow);
+      animation: slideDown 200ms ease;
+      position: relative;
+      clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+    }
+    .modal::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+      border: 1.5px solid var(--border);
+      pointer-events: none; z-index: 2;
+    }
+    .modal h3 {
+      font-size: 15px; font-weight: 600;
+      color: var(--text); margin-bottom: 16px;
+    }
+    .modal .btn-row {
+      display: flex; gap: 8px;
+      margin-top: 16px; justify-content: flex-end;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .risk-items { grid-template-columns: 1fr; }
+      .diagram-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Print */
+    @media print {
+      .header, .sidebar, .toolbar, .main-tabs { display: none; }
+      .container { display: block; }
+      .main { overflow: visible; }
+      .diagram-link-card { break-inside: avoid; }
+      #particleCanvas { display: none !important; }
+      [data-reveal], [data-reveal-card] { opacity: 1 !important; transform: none !important; }
+    }
+
+    /* =============================================
+
+    /* ===== THEME TOGGLE ===== */
+    .theme-toggle {
+      width: 34px; height: 34px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-input);
+      color: var(--primary);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .theme-toggle:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 8px var(--hud-glow);
+    }
+    .theme-toggle svg { width: 18px; height: 18px; }
+
+    /* ===== IMPORT DICT BUTTON ===== */
+    .import-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    .import-btn input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+      font-size: 0;
+    }
+
+    /* ===== CARD DETAIL MODAL ===== */
+    .card-detail-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: none;
+      align-items: center; justify-content: center;
+    }
+    .card-detail-overlay.show { display: flex; animation: overlayIn 0.25s ease; }
+    .card-detail-modal {
+      background: var(--bg-card);
+      border: 1.5px solid var(--hud-line);
+      width: 600px;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 0;
+      position: relative;
+      clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px);
+      animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .card-detail-modal::before {
+      content: '';
+      position: absolute; top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), var(--green), var(--primary), transparent);
+      z-index: 5;
+    }
+    .card-detail-header {
+      padding: 24px 28px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .card-detail-header .cd-icon {
+      width: 44px; height: 44px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-detail-header .cd-icon svg { width: 24px; height: 24px; }
+    .card-detail-header h3 {
+      font-size: 16px; font-weight: 700;
+      color: var(--text);
+    }
+    .card-detail-header .cd-tag {
+      font-family: var(--font-mono);
+      font-size: 10px; color: var(--primary);
+      background: var(--primary-light);
+      border: 1px solid var(--hud-line);
+      padding: 2px 10px; border-radius: 3px;
+      margin-left: auto;
+    }
+    .card-detail-close {
+      position: absolute; top: 16px; right: 20px;
+      width: 28px; height: 28px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px;
+      transition: all 0.2s;
+      z-index: 10;
+    }
+    .card-detail-close:hover { border-color: var(--red); color: var(--red); }
+    .card-detail-body {
+      padding: 20px 28px 28px;
+    }
+    .card-detail-body p {
+      font-size: 13px; color: var(--text-secondary);
+      line-height: 1.8; margin-bottom: 16px;
+    }
+    .card-detail-body .cd-specs {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 16px;
+    }
+    .card-detail-body .cd-spec {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      font-size: 12px;
+      clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+    }
+    .card-detail-body .cd-spec .cd-spec-label {
+      font-size: 10px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .card-detail-body .cd-spec .cd-spec-value {
+      font-family: var(--font-mono);
+      font-size: 13px; color: var(--primary);
+      font-weight: 600;
+    }
+    .card-detail-body .cd-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600;
+      color: var(--primary);
+      text-decoration: none;
+      padding: 8px 16px;
+      border: 1px solid var(--hud-line);
+      clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+      transition: all 0.2s;
+    }
+    .card-detail-body .cd-link:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      box-shadow: 0 0 10px var(--hud-glow);
+    }
+    .card-detail-body .cd-link svg { width: 14px; height: 14px; }
+    /* === BODY BACKGROUND (dark grid) === */
+    body {
+      background:
+        linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px),
+        #0a0e17;
+      background-size: 40px 40px, 40px 40px, 100% 100%;
+    }
+    body::before {
+      content: '';
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent);
+      animation: scanMove 4s linear infinite;
+      pointer-events: none; z-index: 999;
+    }
+    @keyframes scanMove {
+      0% { top: -2px; } 100% { top: 100%; }
+    }
+
+    /* === STAGGER REVEAL === */
+    [data-reveal] { opacity: 0; transform: translateY(16px); }
+    [data-reveal].visible { animation: revealUp 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+    @keyframes revealUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    [data-reveal-card] { opacity: 0; transform: translateY(20px) scale(0.97); }
+    [data-reveal-card].visible { animation: revealCard 0.55s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+    @keyframes revealCard { from{opacity:0;transform:translateY(20px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+    /* === DATA TABLE ROWS === */
+    .data-table tbody tr { animation: rowSlide 0.3s ease forwards; opacity: 0; }
+    @keyframes rowSlide { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+
+    /* === MISC === */
+    .stat-val.counting { transform: scale(1.15); }
+    .stat-cell.s-found.pop { animation: statPop 0.4s ease; }
+    .stat-cell.s-high.pop { animation: statPop 0.4s ease; }
+    @keyframes statPop { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08);box-shadow:0 0 15px rgba(0,212,255,0.2)} }
+
+    #particleCanvas { display: none; }
+
+    /* === TESTSITE BUTTON === */
+    #testsiteBtn {
+      background: #0d1117 !important;
+      border: 1px solid #1e293b !important;
+      color: #00d4ff !important;
+      font-family: var(--font-mono) !important;
+      transition: all 0.2s !important;
+    }
+    #testsiteBtn:hover {
+      border-color: rgba(0,212,255,0.4) !important;
+      box-shadow: 0 0 10px rgba(0,212,255,0.15) !important;
+    }
+
+    /* === HEADER RIGHT LINKS === */
+    .header-right a { position: relative; }
+    .header-right a::after {
+      content: '';
+      position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 1px;
+      background: #00d4ff;
+      transition: width 0.2s;
+    }
+    .header-right a:hover::after { width: 100%; }
+
+    /* =============================================
+       ENTRY ANIMATION - CYBER BOOT SEQUENCE
+       ============================================= */
+    #entryOverlay {
+      position: fixed; inset: 0;
+      z-index: 10000;
+      background: #000;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      overflow: hidden;
+    }
+    #entryOverlay.fade-out {
+      opacity: 0;
+      transform: scale(1.05);
+      pointer-events: none;
+    }
+    #entryOverlay.hidden { display: none; }
+
+    /* Matrix Rain Canvas */
+    #matrixCanvas {
+      position: absolute; inset: 0;
+      z-index: 0;
+      opacity: 0.35;
+    }
+
+    /* Scan Line Overlay */
+    #entryOverlay::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,212,255,0.03) 2px,
+        rgba(0,212,255,0.03) 4px
+      );
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Horizontal Scan Beam */
+    .scan-beam {
+      position: absolute;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, #00d4ff 20%, #00ff88 50%, #00d4ff 80%, transparent 100%);
+      box-shadow: 0 0 20px #00d4ff, 0 0 60px rgba(0,212,255,0.3);
+      z-index: 2;
+      animation: scanBeamMove 2.5s ease-in-out infinite;
+      opacity: 0.8;
+    }
+    @keyframes scanBeamMove {
+      0% { top: -2px; }
+      100% { top: 100%; }
+    }
+
+    /* Grid Overlay */
+    .entry-grid {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(rgba(0,212,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Corner Brackets */
+    .corner {
+      position: absolute;
+      width: 40px; height: 40px;
+      z-index: 3;
+      opacity: 0;
+      animation: cornerFadeIn 0.5s 0.3s ease forwards;
+    }
+    .corner-tl { top: 30px; left: 30px; border-top: 2px solid #00d4ff; border-left: 2px solid #00d4ff; }
+    .corner-tr { top: 30px; right: 30px; border-top: 2px solid #00d4ff; border-right: 2px solid #00d4ff; }
+    .corner-bl { bottom: 30px; left: 30px; border-bottom: 2px solid #00d4ff; border-left: 2px solid #00d4ff; }
+    .corner-br { bottom: 30px; right: 30px; border-bottom: 2px solid #00d4ff; border-right: 2px solid #00d4ff; }
+    @keyframes cornerFadeIn {
+      to { opacity: 0.6; }
+    }
+
+    /* Boot Terminal */
+    .boot-terminal {
+      position: absolute;
+      top: 50px; left: 50px;
+      font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 12px;
+      color: #00d4ff;
+      z-index: 3;
+      max-width: 500px;
+      text-shadow: 0 0 8px rgba(0,212,255,0.4);
+    }
+    .boot-line {
+      opacity: 0;
+      transform: translateX(-10px);
+      animation: bootLineIn 0.3s ease forwards;
+      white-space: nowrap;
+      line-height: 1.8;
+    }
+    .boot-line .dim { color: #334155; }
+    .boot-line .green { color: #00ff88; }
+    .boot-line .cyan { color: #00d4ff; }
+    .boot-line .amber { color: #fbbf24; }
+    .boot-line .red { color: #f87171; }
+    .boot-cursor {
+      display: inline-block;
+      width: 8px; height: 14px;
+      background: #00d4ff;
+      animation: cursorBlink 0.6s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    @keyframes bootLineIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Center Logo Reveal */
+    .entry-logo-wrap {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+      opacity: 0;
+      animation: logoRevealIn 1s 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes logoRevealIn {
+      from { opacity: 0; transform: scale(0.8) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Radar Icon */
+    .entry-radar {
+      width: 100px; height: 100px;
+      margin: 0 auto 24px;
+      position: relative;
+    }
+    .entry-radar svg {
+      width: 100%; height: 100%;
+      filter: drop-shadow(0 0 20px rgba(0,212,255,0.5));
+    }
+    .radar-ring {
+      position: absolute; inset: 0;
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 50%;
+      animation: radarRingPulse 2s ease-out infinite;
+    }
+    .radar-ring:nth-child(2) { animation-delay: 0.5s; }
+    .radar-ring:nth-child(3) { animation-delay: 1s; }
+    @keyframes radarRingPulse {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    /* Main Title */
+    .entry-title {
+      font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      color: #fff;
+      position: relative;
+      margin-bottom: 8px;
+    }
+    .entry-title .glitch {
+      position: relative;
+      display: inline-block;
+    }
+    .entry-title .glitch::before,
+    .entry-title .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .entry-title .glitch::before {
+      color: #00d4ff;
+      animation: glitch1 3s infinite linear;
+      clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    }
+    .entry-title .glitch::after {
+      color: #00ff88;
+      animation: glitch2 3s infinite linear;
+      clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    }
+    @keyframes glitch1 {
+      0%, 90%, 100% { transform: translate(0); }
+      92% { transform: translate(3px, -1px); }
+      94% { transform: translate(-3px, 1px); }
+      96% { transform: translate(2px, 0); }
+    }
+    @keyframes glitch2 {
+      0%, 90%, 100% { transform: translate(0); }
+      91% { transform: translate(-2px, 1px); }
+      93% { transform: translate(3px, -1px); }
+      95% { transform: translate(-1px, 0); }
+    }
+
+    .entry-subtitle {
+      font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 14px;
+      color: #475569;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+    .entry-version {
+      font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 12px;
+      color: #00d4ff;
+      border: 1px solid rgba(0,212,255,0.3);
+      padding: 4px 16px;
+      border-radius: 4px;
+      display: inline-block;
+      text-shadow: 0 0 10px rgba(0,212,255,0.3);
+      margin-bottom: 40px;
+    }
+
+    /* Enter Button */
+    .entry-enter-btn {
+      font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #00d4ff;
+      background: transparent;
+      border: 1px solid rgba(0,212,255,0.4);
+      padding: 12px 40px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      opacity: 0;
+      animation: enterBtnIn 0.6s 2.8s ease forwards;
+    }
+    .entry-enter-btn:hover {
+      background: rgba(0,212,255,0.1);
+      border-color: #00d4ff;
+      box-shadow: 0 0 20px rgba(0,212,255,0.3), inset 0 0 20px rgba(0,212,255,0.1);
+      transform: translateY(-2px);
+    }
+    .entry-enter-btn::before {
+      content: '';
+      position: absolute; top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+    .entry-enter-btn:hover::before { left: 100%; }
+    @keyframes enterBtnIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Skip Button */
+    .skip-btn {
+      position: absolute;
+      bottom: 30px; right: 30px;
+      z-index: 6;
+      font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      color: #475569;
+      background: transparent;
+      border: 1px solid #1e293b;
+      padding: 6px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0;
+      animation: skipBtnIn 0.4s 1s ease forwards;
+    }
+    .skip-btn:hover {
+      color: #94a3b8;
+      border-color: #334155;
+    }
+    @keyframes skipBtnIn {
+      to { opacity: 1; }
+    }
+
+    /* Hex Pattern */
+    .hex-pattern {
+      position: absolute;
+      bottom: 40px; left: 40px;
+      z-index: 2;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #1e293b;
+      line-height: 1.4;
+      letter-spacing: 2px;
+      opacity: 0;
+      animation: hexFade 0.5s 0.8s ease forwards;
+    }
+    @keyframes hexFade { to { opacity: 0.4; } }
+
+    /* Status Bar */
+    .entry-status-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 28px;
+      background: rgba(0,0,0,0.8);
+      border-top: 1px solid rgba(0,212,255,0.1);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 5;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #334155;
+      gap: 20px;
+      opacity: 0;
+      animation: statusIn 0.4s 0.5s ease forwards;
+    }
+    .entry-status-bar .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #00ff88;
+      box-shadow: 0 0 6px #00ff88;
+      animation: pulse 1.5s ease infinite;
+    }
+    @keyframes statusIn { to { opacity: 1; } }
+
+    /* Hexagon decoration */
+    .hex-deco {
+      position: absolute;
+      width: 200px; height: 200px;
+      z-index: 1;
+      opacity: 0.04;
+    }
+    .hex-deco-1 { top: 10%; right: 10%; }
+    .hex-deco-2 { bottom: 15%; left: 5%; }
+  </style>
+</head>
+<body>
+
+<!-- ===== ENTRY ANIMATION OVERLAY ===== -->
+<div id="entryOverlay">
+  <canvas id="matrixCanvas"></canvas>
+  <div class="entry-grid"></div>
+  <div class="scan-beam"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <!-- Boot Terminal -->
+  <div class="boot-terminal" id="bootTerminal"></div>
+
+  <!-- Hex Pattern -->
+  <div class="hex-pattern">
+    4C6973745363616E6E6572<br>
+    2F76322E302F6279736A0A<br>
+    576562506174685363616E<br>
+    6E65722F456E67696E6500
+  </div>
+
+  <!-- Hex Decoration -->
+  <svg class="hex-deco hex-deco-1" viewBox="0 0 200 200">
+    <polygon points="100,10 180,50 180,130 100,170 20,130 20,50" fill="none" stroke="#00d4ff" stroke-width="1"/>
+    <polygon points="100,30 160,60 160,120 100,150 40,120 40,60" fill="none" stroke="#00d4ff" stroke-width="0.5"/>
+  </svg>
+  <svg class="hex-deco hex-deco-2" viewBox="0 0 200 200">
+    <polygon points="100,10 180,50 180,130 100,170 20,130 20,50" fill="none" stroke="#00ff88" stroke-width="1"/>
+  </svg>
+
+  <!-- Center Logo -->
+  <div class="entry-logo-wrap">
+    <div class="entry-radar">
+      <div class="radar-ring"></div>
+      <div class="radar-ring"></div>
+      <div class="radar-ring"></div>
+      <svg viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="40" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+        <circle cx="50" cy="50" r="25" stroke="rgba(0,212,255,0.5)" stroke-width="1"/>
+        <circle cx="50" cy="50" r="10" stroke="rgba(0,212,255,0.7)" stroke-width="1.5"/>
+        <circle cx="50" cy="50" r="3" fill="#00d4ff"/>
+        <line x1="50" y1="50" x2="85" y2="30" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="2s" repeatCount="indefinite"/>
+        </line>
+        <circle cx="72" cy="34" r="3" fill="#00ff88" opacity="0.8">
+          <animate attributeName="opacity" values="0.8;0.1;0.8" dur="1.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="38" cy="60" r="2" fill="#00d4ff" opacity="0.6">
+          <animate attributeName="opacity" values="0.6;0.1;0.6" dur="1.8s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+    <div class="entry-title">
+      <span class="glitch" data-text="ListScanner">ListScanner</span>
+    </div>
+    <div class="entry-subtitle">Web Path Scanner</div>
+    <div class="entry-version">v2.0 // Security Edition</div>
+    <br>
+    <button class="entry-enter-btn" onclick="dismissEntry()">
+      [ Enter System ]
+    </button>
+  </div>
+
+  <!-- Skip -->
+  <button class="skip-btn" onclick="dismissEntry()">
+    SKIP →
+  </button>
+
+  <!-- Status Bar -->
+  <div class="entry-status-bar">
+    <span class="dot"></span>
+    <span id="entryStatusText">Initializing...</span>
+    <span style="margin-left:auto;">SYS://ListScanner/v2.0</span>
+  </div>
+</div>
+
+<div class="header">
+  <div class="logo-group">
+    <div class="logo-icon" style="position:relative;overflow:visible;">
+      <svg viewBox="0 0 32 32" width="20" height="20" fill="none">
+        <circle cx="16" cy="16" r="12" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+        <circle cx="16" cy="16" r="7" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        <circle cx="16" cy="16" r="2" fill="rgba(255,255,255,0.9)"/>
+        <line x1="16" y1="16" x2="28" y2="10" stroke="#fff" stroke-width="2" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="3s" repeatCount="indefinite"/>
+        </line>
+        <circle cx="23" cy="11" r="1.5" fill="#60a5fa" opacity="0.8">
+          <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+    <div class="logo-text">List<span>Scanner</span></div>
+    <div class="logo-ver">v2.0</div>
+  </div>
+  <div class="header-right">
+    Web路径与敏感文件扫描工具
+    <button class="theme-toggle" onclick="toggleTheme()" title="切换亮色/暗色主题" id="themeBtn">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+    <button id="testsiteBtn" onclick="toggleTestsite()" style="padding:6px 14px;border-radius:4px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span id="testsiteBtnText">启动靶场</span>
+    </button>
+    <a href="/diagrams/architecture" target="_blank">结构图</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="sidebar">
+    <div class="sidebar-scroll">
+      <!-- Step 1 -->
+      <div class="cfg-section" data-reveal>
+        <div class="cfg-head">
+          <div class="cfg-step">1</div>
+          <div class="cfg-title">目标地址</div>
+        </div>
+        <div class="cfg-desc">
+          输入要扫描的网站地址，支持带或不带 <code>http://</code> 前缀，工具会自动补全。
+        </div>
+        <div class="cfg-body">
+          <input type="text" id="targetUrl" placeholder="http://127.0.0.1" value="http://127.0.0.1">
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="cfg-section" data-reveal>
+        <div class="cfg-head">
+          <div class="cfg-step">2</div>
+          <div class="cfg-title">字典配置</div>
+        </div>
+        <div class="cfg-desc">
+          字典文件包含要探测的路径列表。支持 <code>#</code> 注释，<code>%EXT%</code> 占位符会替换为扩展名。
+        </div>
+        <div class="cfg-body">
+          <div class="wl-bar">
+            <select id="wordlist"></select>
+            <button class="btn-icon" onclick="loadWordlistContent()" title="加载字典内容">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            </button>
+            <button class="btn-icon" onclick="showNewWlModal()" title="新建字典">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="btn-icon import-btn" title="导入字典文件">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <input type="file" accept=".txt,.dic,.lst,.wordlist" onchange="importDictFile(this)">
+            </button>
+          </div>
+          <div class="wl-editor" id="wlEditor">
+            <textarea id="wlContent" placeholder="字典内容加载中..."></textarea>
+            <div class="wl-editor-actions">
+              <button class="btn btn-sm primary" onclick="saveWordlist()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                保存修改
+              </button>
+              <button class="btn btn-sm" onclick="previewFromEditor()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                预览展开结果
+              </button>
+            </div>
+          </div>
+          <div id="previewResult" style="display:none;margin-top:10px;">
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">
+              <span id="previewCount" style="color:var(--primary);font-weight:600;"></span>
+            </div>
+            <div id="previewList" style="max-height:140px;overflow-y:auto;font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);line-height:1.7;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="cfg-section" data-reveal>
+        <div class="cfg-head">
+          <div class="cfg-step">3</div>
+          <div class="cfg-title">文件扩展名</div>
+        </div>
+        <div class="cfg-desc">
+          选择要测试的文件扩展名。字典中没有扩展名的条目会自动生成变体，如 <code>admin</code> 变为 <code>admin.php</code> 等。
+        </div>
+        <div class="cfg-body">
+          <div class="ext-tags" id="extTags"></div>
+          <div class="ext-input-row">
+            <input type="text" id="newExt" placeholder="输入自定义扩展名">
+            <button class="btn btn-sm" onclick="addExt()">添加</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="cfg-section" data-reveal>
+        <div class="cfg-head">
+          <div class="cfg-step">4</div>
+          <div class="cfg-title">并发参数</div>
+        </div>
+        <div class="cfg-desc">
+          <b>线程数</b>控制并发请求数，值越大越快但对服务器压力越大。<b>超时</b>是单个请求的等待时间。
+        </div>
+        <div class="cfg-body">
+          <div style="margin-bottom:12px;">
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;font-weight:500;">线程数</div>
+            <div class="slider-row">
+              <input type="range" id="threadsSlider" min="1" max="50" value="10" oninput="syncSlider('threads')">
+              <div class="slider-val" id="threadsVal">10</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;font-weight:500;">超时 (秒)</div>
+            <div class="slider-row">
+              <input type="range" id="timeoutSlider" min="1" max="30" value="5" oninput="syncSlider('timeout')">
+              <div class="slider-val" id="timeoutVal">5</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="cfg-section" data-reveal>
+        <div class="cfg-head">
+          <div class="cfg-step">5</div>
+          <div class="cfg-title">报告输出</div>
+        </div>
+        <div class="cfg-desc">
+          扫描完成后自动生成HTML报告文件，可在浏览器中直接打开。
+        </div>
+        <div class="cfg-body">
+          <input type="text" id="output" value="{{ settings.output }}">
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-fixed">
+      <button class="btn btn-scan" id="scanBtn" onclick="startScan()">
+        <span class="ripple"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        开始扫描
+      </button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="main-tabs">
+      <div class="main-tab active" onclick="switchTab('scan',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/></svg>
+        扫描工作台
+      </div>
+      <div class="main-tab" onclick="switchTab('diagrams',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        项目结构图
+      </div>
+    </div>
+
+    <!-- Tab: Scan -->
+    <div class="tab-content active" id="tab-scan">
+      <div class="main-inner">
+        <div class="empty-state" id="emptyState">
+          <div class="icon-circle" style="position:relative;">
+            <svg viewBox="0 0 48 48" width="36" height="36" fill="none">
+              <circle cx="24" cy="24" r="18" stroke="#00d4ff" stroke-width="1.5" opacity="0.3"/>
+              <circle cx="24" cy="24" r="12" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
+              <circle cx="24" cy="24" r="6" stroke="#00d4ff" stroke-width="1.5" opacity="0.7"/>
+              <circle cx="24" cy="24" r="2" fill="#00d4ff"/>
+              <line x1="24" y1="24" x2="40" y2="16" stroke="#00d4ff" stroke-width="2" stroke-linecap="round">
+                <animateTransform attributeName="transform" type="rotate" from="0 24 24" to="360 24 24" dur="4s" repeatCount="indefinite"/>
+              </line>
+              <circle cx="35" cy="18" r="2.5" fill="#00ff88" opacity="0.8">
+                <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite"/>
+              </circle>
+              <text x="24" y="46" text-anchor="middle" fill="#00d4ff" font-size="5" font-family="monospace" opacity="0.4">SCAN</text>
+            </svg>
+          </div>
+          <h2>Web路径敏感文件探测</h2>
+          <p>在左侧逐步配置目标地址、字典文件和扫描参数，然后点击执行扫描。工具将自动探测并分类发现的安全风险。</p>
+          <div class="hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+            从左侧 Step 1 开始配置
+          </div>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+          <div class="terminal" id="terminal">
+            <div class="terminal-bar">
+              <div class="terminal-dot"></div>
+              <div class="terminal-title">扫描日志 - 实时</div>
+            </div>
+            <div class="terminal-body" id="logBody"></div>
+          </div>
+
+          <div class="progress-panel">
+            <div class="progress-head">
+              <div class="progress-status running" id="statusBadge">
+                <div class="dot"></div>
+                <span id="statusText">扫描中</span>
+              </div>
+              <div class="progress-pct" id="progressPct">0%</div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="stat-grid">
+              <div class="stat-cell s-total">
+                <div class="stat-val" id="statTotal">0</div>
+                <div class="stat-name">测试路径</div>
+              </div>
+              <div class="stat-cell s-found">
+                <div class="stat-val" id="statFound">0</div>
+                <div class="stat-name">发现结果</div>
+              </div>
+              <div class="stat-cell s-high">
+                <div class="stat-val" id="statHigh">0</div>
+                <div class="stat-name">高风险</div>
+              </div>
+              <div class="stat-cell s-err">
+                <div class="stat-val" id="statErrors">0</div>
+                <div class="stat-name">请求失败</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="results-panel" id="resultsPanel">
+            <div class="results-bar">
+              <h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                扫描结果
+              </h2>
+              <div class="filter-chips">
+                <button class="chip active" onclick="filterResults('all',this)">全部</button>
+                <button class="chip" onclick="filterResults('高风险',this)">高风险</button>
+                <button class="chip" onclick="filterResults('中风险',this)">中风险</button>
+                <button class="chip" onclick="filterResults('低风险',this)">低风险</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>状态码</th>
+                    <th>风险等级</th>
+                    <th>风险类型</th>
+                    <th>URL</th>
+                    <th>大小</th>
+                    <th>Content-Type</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="exportPanel" class="export-panel" style="display:none;">
+          <div class="export-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            导出扫描报告
+            <span>EXPORT</span>
+          </div>
+          <div class="export-grid">
+            <div class="export-btn e-html" onclick="exportReport('html')">
+              <div class="eb-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="eb-label">HTML 报告</div>
+              <div class="eb-hint">可视化完整报告</div>
+            </div>
+            <div class="export-btn e-csv" onclick="exportReport('csv')">
+              <div class="eb-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <div class="eb-label">CSV 数据</div>
+              <div class="eb-hint">Excel 表格兼容</div>
+            </div>
+            <div class="export-btn e-json" onclick="exportReport('json')">
+              <div class="eb-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              </div>
+              <div class="eb-label">JSON 数据</div>
+              <div class="eb-hint">结构化原始数据</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="risk-guide" id="riskGuide">
+          <h2>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            风险分类说明
+          </h2>
+          <div id="riskInfoContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Diagrams -->
+    <div class="tab-content" id="tab-diagrams">
+      <div class="main-inner">
+        <div style="margin-bottom:20px;">
+          <h2 style="font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:4px;">项目结构图与示意图</h2>
+          <p style="font-size:13px;color:#64748b;">点击任意卡片在新窗口中打开独立图表页面，可直接截图或打印插入论文。所有图表均使用白底配色，适合打印。</p>
+        </div>
+        <div class="diagram-grid">
+          <a class="diagram-link-card full" href="/diagrams/architecture" target="_blank" data-reveal-card data-card="architecture" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(0,212,255,0.1);color:#00d4ff;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            </div>
+            <h3>系统整体架构图</h3>
+            <p>展示系统各层（用户层、核心引擎、数据层、外部资源）之间的调用关系与数据流向。</p>
+            <span class="tag">UML Package</span>
+          </a>
+
+          <a class="diagram-link-card" href="/diagrams/functional" target="_blank" data-reveal-card data-card="functional" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(0,255,136,0.1);color:#00ff88;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+            <h3>功能结构图</h3>
+            <p>扫描功能的模块分解：目标配置、字典管理、扫描执行、结果展示等子功能。</p>
+            <span class="tag">Functional</span>
+          </a>
+
+          <a class="diagram-link-card" href="/diagrams/class" target="_blank" data-reveal-card data-card="class" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(255,165,2,0.1);color:#ffa502;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/></svg>
+            </div>
+            <h3>UML 类图</h3>
+            <p>WebScanner、ScanResult、ScanStats 三个核心类的属性、方法及类间关系。</p>
+            <span class="tag">UML Class</span>
+          </a>
+
+          <a class="diagram-link-card full" href="/diagrams/dataflow" target="_blank" data-reveal-card data-card="dataflow" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(255,71,87,0.1);color:#ff4757;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <h3>扫描流程 / 数据流图</h3>
+            <p>从用户输入参数到生成报告的完整时序交互，展示各模块间的调用顺序。</p>
+            <span class="tag">Sequence</span>
+          </a>
+
+          <a class="diagram-link-card" href="/diagrams/er" target="_blank" data-reveal-card data-card="er" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(0,212,255,0.08);color:#00d4ff;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+            </div>
+            <h3>E-R 数据模型图</h3>
+            <p>扫描任务、扫描结果、字典、配置四个实体之间的关系与属性定义。</p>
+            <span class="tag">ER Diagram</span>
+          </a>
+
+          <a class="diagram-link-card" href="/diagrams/check_path" target="_blank" data-reveal-card data-card="check_path" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(0,255,136,0.08);color:#00ff88;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <h3>check_path() 流程图</h3>
+            <p>scanner.py 中核心函数的执行流程：请求、状态判断、风险分类、结果构建。</p>
+            <span class="tag">Flowchart</span>
+          </a>
+
+          <a class="diagram-link-card full" href="/diagrams/risk_decision" target="_blank" data-reveal-card data-card="risk_decision" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(255,71,87,0.08);color:#ff4757;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <h3>check_risk() 风险分类决策树</h3>
+            <p>classifier.py 中风险判定的完整决策逻辑，从路径特征到最终风险等级的判定过程。</p>
+            <span class="tag">Decision Tree</span>
+          </a>
+
+          <a class="diagram-link-card full" href="/diagrams/requests_flow" target="_blank" data-reveal-card data-card="requests_flow" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(0,212,255,0.08);color:#00d4ff;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <h3>requests 库 HTTP 请求流程</h3>
+            <p>scanner.py 中 requests.get() 的完整调用链：DNS解析、TCP连接、HTTP请求发送、响应处理及异常捕获流程。</p>
+            <span class="tag">Sequence + Source</span>
+          </a>
+
+          <a class="diagram-link-card" href="/diagrams/deployment" target="_blank" data-reveal-card data-card="deployment" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(100,116,139,0.1);color:#94a3b8;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h3>系统部署架构图</h3>
+            <p>B/S 三层架构：浏览器前端、Flask 后端服务、数据资源层及外部目标服务器之间的调用关系。</p>
+            <span class="tag">Deployment</span>
+          </a>
+
+          <a class="diagram-link-card" href="/diagrams/scan_workflow" target="_blank" data-reveal-card data-card="scan_workflow" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(100,116,139,0.1);color:#94a3b8;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+            </div>
+            <h3>扫描执行流程图</h3>
+            <p>从用户启动扫描到生成报告的完整流程：参数校验、字典展开、线程池并发、风险分类、结果排序。</p>
+            <span class="tag">Flowchart</span>
+          </a>
+
+          <a class="diagram-link-card full" href="/diagrams/module_dep" target="_blank" data-reveal-card data-card="module_dep" onclick="openCardDetail(event, this)">
+            <div class="card-icon" style="background:rgba(100,116,139,0.1);color:#94a3b8;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            </div>
+            <h3>模块依赖关系图</h3>
+            <p>listscanner 包内各模块（scanner、classifier、wordlist、models 等）之间的 import 调用关系。</p>
+            <span class="tag">Dependency</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New wordlist modal -->
+<div class="modal-overlay" id="newWlModal">
+  <div class="modal">
+    <h3>新建字典文件</h3>
+    <input type="text" id="newWlName" placeholder="输入字典名称，如 custom">
+    <div class="btn-row">
+      <button class="btn btn-sm" onclick="closeNewWlModal()">取消</button>
+      <button class="btn btn-sm primary" onclick="createWordlist()">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Card Detail Modal -->
+<div class="card-detail-overlay" id="cardDetailOverlay" onclick="closeCardDetail(event)">
+  <div class="card-detail-modal" id="cardDetailModal">
+    <button class="card-detail-close" onclick="closeCardDetail()">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="card-detail-header">
+      <div class="cd-icon" id="cdIcon"></div>
+      <div>
+        <h3 id="cdTitle"></h3>
+      </div>
+      <span class="cd-tag" id="cdTag"></span>
+    </div>
+    <div class="card-detail-body" id="cdBody"></div>
+  </div>
+</div>
+
+<style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
+
+<script>
+/* ===== ENTRY ANIMATION - MATRIX RAIN + BOOT SEQUENCE ===== */
+(function() {
+  // Matrix Rain
+  var canvas = document.getElementById('matrixCanvas');
+  if (canvas) {
+    var ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*()_+-=[]{}|;:,.<>?/~`αβγδεζηθικλμνξπρστυφχψω';
+    var fontSize = 14;
+    var columns = Math.floor(canvas.width / fontSize);
+    var drops = [];
+    for (var i = 0; i < columns; i++) {
+      drops[i] = Math.random() * -100;
+    }
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.06)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#00d4ff';
+      ctx.font = fontSize + 'px monospace';
+      for (var i = 0; i < drops.length; i++) {
+        var char = chars[Math.floor(Math.random() * chars.length)];
+        var x = i * fontSize;
+        var y = drops[i] * fontSize;
+        // Brighter head
+        ctx.fillStyle = Math.random() > 0.98 ? '#00ff88' : '#00d4ff';
+        ctx.globalAlpha = 0.6 + Math.random() * 0.4;
+        ctx.fillText(char, x, y);
+        ctx.globalAlpha = 1;
+        if (y > canvas.height && Math.random() > 0.985) {
+          drops[i] = 0;
+        }
+        drops[i] += 0.5 + Math.random() * 0.5;
+      }
+    }
+    var matrixInterval = setInterval(function() {
+      if (document.getElementById('entryOverlay').classList.contains('hidden')) {
+        clearInterval(matrixInterval);
+        return;
+      }
+      drawMatrix();
+    }, 35);
+  }
+
+  // Boot Terminal Sequence
+  var bootLines = [
+    { text: '> POST... BIOS check OK', cls: 'dim' },
+    { text: '> Loading kernel modules...', cls: 'dim' },
+    { text: '  [OK] net.core.scanner', cls: 'green' },
+    { text: '  [OK] net.http.client', cls: 'green' },
+    { text: '  [OK] security.classifier', cls: 'green' },
+    { text: '  [OK] data.wordlist_engine', cls: 'green' },
+    { text: '> Mounting /dev/dictionary...', cls: 'dim' },
+    { text: '  wordlist.txt loaded (847 entries)', cls: 'cyan' },
+    { text: '> Initializing scan engine...', cls: 'dim' },
+    { text: '  ThreadPool: 10 workers ready', cls: 'cyan' },
+    { text: '  Risk classifier: 3 levels active', cls: 'cyan' },
+    { text: '> Starting Flask web server...', cls: 'dim' },
+    { text: '  http://0.0.0.0:5000', cls: 'amber' },
+    { text: '> System ready. Welcome.', cls: 'green' },
+  ];
+
+  var bootEl = document.getElementById('bootTerminal');
+  var statusText = document.getElementById('entryStatusText');
+  var lineIdx = 0;
+
+  function typeBootLine() {
+    if (lineIdx >= bootLines.length || !bootEl) {
+      if (statusText) statusText.textContent = 'System Ready';
+      return;
+    }
+    var line = bootLines[lineIdx];
+    var div = document.createElement('div');
+    div.className = 'boot-line';
+    div.style.animationDelay = '0s';
+    div.innerHTML = '<span class="' + line.cls + '">' + line.text + '</span>';
+    if (lineIdx === bootLines.length - 1) {
+      div.innerHTML += '<span class="boot-cursor"></span>';
+    }
+    bootEl.appendChild(div);
+    if (statusText) statusText.textContent = line.text.substring(0, 40);
+    lineIdx++;
+    setTimeout(typeBootLine, 120 + Math.random() * 80);
+  }
+
+  setTimeout(typeBootLine, 500);
+
+  // Auto dismiss after 8 seconds
+  setTimeout(function() {
+    dismissEntry();
+  }, 8000);
+})();
+
+function dismissEntry() {
+  var overlay = document.getElementById('entryOverlay');
+  if (!overlay || overlay.classList.contains('hidden') || overlay.classList.contains('fade-out')) return;
+  overlay.classList.add('fade-out');
+  setTimeout(function() {
+    overlay.classList.add('hidden');
+    // Trigger main UI animations
+    initRevealAnimations();
+  }, 800);
+}
+
+/* ===== MAIN APP ===== */
+let allResults = [];
+let lastLogCount = 0;
+let currentTaskId = null;
+let pollTimer = null;
+let activeExts = new Set();
+let wordlistFiles = [];
+let logQueue = [];
+let typingInProgress = false;
+
+// === COUNT UP ANIMATION ===
+function animateCount(el, target, duration) {
+  if (!duration) duration = 800;
+  const start = parseInt(el.textContent) || 0;
+  if (start === target) return;
+  el.classList.add('counting');
+  const startTime = performance.now();
+  function tick(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(start + (target - start) * eased);
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      el.textContent = target;
+      el.classList.remove('counting');
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+// === STAGGER REVEAL ===
+function initRevealAnimations() {
+  document.querySelectorAll('[data-reveal]').forEach(function(el, i) {
+    setTimeout(function() { el.classList.add('visible'); }, 100 + i * 120);
+  });
+  document.querySelectorAll('[data-reveal-card]').forEach(function(el, i) {
+    setTimeout(function() { el.classList.add('visible'); }, 400 + i * 100);
+  });
+}
+
+// === 3D TILT ON DIAGRAM CARDS ===
+function initCardTilt() {
+  document.querySelectorAll('.diagram-link-card').forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      const rotateX = (y - 0.5) * -8;
+      const rotateY = (x - 0.5) * 8;
+      card.style.transform = 'perspective(600px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateY(-4px)';
+    });
+    card.addEventListener('mouseleave', function() {
+      card.style.transform = '';
+    });
+  });
+}
+
+// === RIPPLE CLICK EFFECT ===
+function initRipple() {
+  var btn = document.getElementById('scanBtn');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var ripple = btn.querySelector('.ripple');
+    if (!ripple) return;
+    ripple.classList.remove('active');
+    void ripple.offsetWidth;
+    ripple.classList.add('active');
+  });
+}
+
+// === TYPING LOG EFFECT ===
+function typeLogLine(lineEl, text, callback) {
+  var urlSpan = lineEl.querySelector('.log-url');
+  if (!urlSpan) { if (callback) callback(); return; }
+  var fullText = urlSpan.textContent;
+  urlSpan.textContent = '';
+  urlSpan.style.borderRight = '2px solid #60a5fa';
+  var i = 0;
+  function type() {
+    if (i < fullText.length) {
+      urlSpan.textContent += fullText[i];
+      i++;
+      setTimeout(type, 8);
+    } else {
+      urlSpan.style.borderRight = '';
+      if (callback) callback();
+    }
+  }
+  type();
+}
+
+function processLogQueue() {
+  if (typingInProgress || logQueue.length === 0) return;
+  typingInProgress = true;
+  var item = logQueue.shift();
+  typeLogLine(item.line, null, function() {
+    typingInProgress = false;
+    processLogQueue();
+  });
+}
+
+async function init() {
+  // Don't trigger reveal animations until entry overlay is dismissed
+  initCardTilt();
+  initRipple();
+  await loadWordlists();
+  loadRiskInfo();
+  initExtensions();
+}
+
+// === WORDLIST ===
+async function loadWordlists() {
+  const resp = await fetch('/api/wordlists');
+  wordlistFiles = await resp.json();
+  const sel = document.getElementById('wordlist');
+  sel.innerHTML = '';
+  wordlistFiles.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f;
+    opt.textContent = f.replace('dictionary\\', '').replace('dictionary/', '');
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', () => loadWordlistContent());
+  if (wordlistFiles.length) loadWordlistContent();
+}
+
+async function loadWordlistContent() {
+  const file = document.getElementById('wordlist').value;
+  const resp = await fetch('/api/wordlist/content', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({wordlist: file}),
+  });
+  const data = await resp.json();
+  document.getElementById('wlEditor').classList.add('show');
+  const ta = document.getElementById('wlContent');
+  ta.value = data.success ? data.content : '# 加载失败: ' + data.error;
+}
+
+async function saveWordlist() {
+  const file = document.getElementById('wordlist').value;
+  const content = document.getElementById('wlContent').value;
+  const resp = await fetch('/api/wordlist/save', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({wordlist: file, content}),
+  });
+  const data = await resp.json();
+  showToast(data.success ? '字典已保存' : '保存失败: ' + data.error, data.success ? 'success' : 'error');
+}
+
+async function previewFromEditor() {
+  const content = document.getElementById('wlContent').value;
+  const extensions = getActiveExts().join(',');
+  const resp = await fetch('/api/wordlist/preview', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({content, extensions}),
+  });
+  const data = await resp.json();
+  const box = document.getElementById('previewResult');
+  box.style.display = 'block';
+  if (data.success) {
+    document.getElementById('previewCount').textContent = `展开后共 ${data.count} 条路径（显示前 ${data.preview.length} 条）：`;
+    document.getElementById('previewList').innerHTML = data.preview.map(w => `<div>${w}</div>`).join('');
+  } else {
+    document.getElementById('previewCount').innerHTML = `<span style="color:var(--red);">错误: ${data.error}</span>`;
+    document.getElementById('previewList').innerHTML = '';
+  }
+}
+
+function showNewWlModal() {
+  document.getElementById('newWlModal').classList.add('show');
+  document.getElementById('newWlName').value = '';
+  document.getElementById('newWlName').focus();
+}
+function closeNewWlModal() {
+  document.getElementById('newWlModal').classList.remove('show');
+}
+
+async function createWordlist() {
+  const name = document.getElementById('newWlName').value.trim();
+  if (!name) { showToast('请输入字典名称', 'error'); return; }
+  const resp = await fetch('/api/wordlist/create', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name}),
+  });
+  const data = await resp.json();
+  if (data.success) {
+    showToast('字典已创建: ' + data.path, 'success');
+    closeNewWlModal();
+    await loadWordlists();
+    document.getElementById('wordlist').value = data.path;
+    loadWordlistContent();
+  } else {
+    showToast('创建失败: ' + data.error, 'error');
+  }
+}
+
+// === EXTENSIONS ===
+function initExtensions() {
+  const defaults = '{{ settings.extensions }}'.split(',').map(s => s.trim());
+  const common = ['php', 'html', 'bak', 'zip', 'asp', 'aspx', 'jsp', 'txt', 'old', 'sql', 'rar', 'tar.gz'];
+  const all = [...new Set([...defaults, ...common])];
+  all.forEach(ext => { if (defaults.includes(ext)) activeExts.add(ext); });
+  renderExtTags();
+}
+
+function renderExtTags() {
+  const container = document.getElementById('extTags');
+  const all = [...activeExts];
+  ['php','html','bak','zip','asp','aspx','jsp','txt','old','sql'].forEach(e => { if (!all.includes(e)) all.push(e); });
+  container.innerHTML = all.map(ext =>
+    `<div class="ext-tag ${activeExts.has(ext) ? 'active' : ''}" onclick="toggleExt('${ext}',this)">${ext}</div>`
+  ).join('');
+}
+
+function toggleExt(ext, el) {
+  if (activeExts.has(ext)) {
+    activeExts.delete(ext);
+    el.classList.remove('active');
+  } else {
+    activeExts.add(ext);
+    el.classList.add('active');
+  }
+}
+
+function addExt() {
+  const input = document.getElementById('newExt');
+  const ext = input.value.trim().replace(/^\./, '');
+  if (!ext) return;
+  activeExts.add(ext);
+  input.value = '';
+  renderExtTags();
+}
+
+function getActiveExts() { return [...activeExts]; }
+
+// === SLIDERS ===
+function syncSlider(type) {
+  if (type === 'threads') {
+    document.getElementById('threadsVal').textContent = document.getElementById('threadsSlider').value;
+  } else {
+    document.getElementById('timeoutVal').textContent = document.getElementById('timeoutSlider').value;
+  }
+}
+
+// === TOAST ===
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  const icon = type === 'success'
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+  t.innerHTML = icon + msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// === SCAN ===
+async function startScan() {
+  const url = document.getElementById('targetUrl').value.trim();
+  if (!url) { showToast('请输入目标地址', 'error'); return; }
+
+  const body = {
+    url,
+    wordlist: document.getElementById('wordlist').value,
+    wordlist_content: document.getElementById('wlContent').value,
+    extensions: getActiveExts().join(','),
+    threads: document.getElementById('threadsSlider').value,
+    timeout: document.getElementById('timeoutSlider').value,
+    output: document.getElementById('output').value,
+  };
+
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true;
+  btn.style.animation = 'none';
+  btn.innerHTML = '<span class="ripple"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> 扫描中...';
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('dashboard').classList.add('show');
+  document.getElementById('terminal').classList.add('show');
+  document.getElementById('resultsPanel').classList.add('show');
+  document.getElementById('riskGuide').style.display = 'none';
+  document.getElementById('exportPanel').style.display = 'none';
+  document.getElementById('logBody').innerHTML = '';
+  allResults = []; lastLogCount = 0;
+
+  ['statTotal','statFound','statHigh','statErrors'].forEach(id => document.getElementById(id).textContent = '0');
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressPct').textContent = '0%';
+  document.getElementById('statusText').textContent = '扫描中';
+  document.getElementById('statusBadge').className = 'progress-status running';
+  document.getElementById('resultsBody').innerHTML = '';
+
+  try {
+    const resp = await fetch('/api/scan', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body),
+    });
+    const data = await resp.json();
+    if (!data.success) {
+      showToast('扫描启动失败: ' + data.error, 'error');
+      resetBtn();
+      return;
+    }
+    currentTaskId = data.task_id;
+    pollProgress();
+  } catch (e) {
+    showToast('请求失败: ' + e.message, 'error');
+    resetBtn();
+  }
+}
+
+const spinStyle = document.createElement('style');
+spinStyle.textContent = '@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
+document.head.appendChild(spinStyle);
+
+function pollProgress() {
+  if (!currentTaskId) return;
+  let prevFound = 0;
+  pollTimer = setInterval(async () => {
+    try {
+      const resp = await fetch(`/api/scan/${currentTaskId}`);
+      const task = await resp.json();
+      const pct = task.total > 0 ? Math.round(task.completed / task.total * 100) : 0;
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressPct').textContent = pct + '%';
+      animateCount(document.getElementById('statTotal'), task.total, 400);
+      animateCount(document.getElementById('statFound'), task.found, 500);
+      animateCount(document.getElementById('statErrors'), task.errors, 400);
+      let hc = 0;
+      task.results.forEach(r => { if (r.risk_level === '高风险') hc++; });
+      animateCount(document.getElementById('statHigh'), hc, 500);
+      if (task.found > prevFound) {
+        var foundCell = document.querySelector('.stat-cell.s-found');
+        if (foundCell) { foundCell.classList.remove('pop'); void foundCell.offsetWidth; foundCell.classList.add('pop'); }
+        if (hc > 0) {
+          var highCell = document.querySelector('.stat-cell.s-high');
+          if (highCell) { highCell.classList.remove('pop'); void highCell.offsetWidth; highCell.classList.add('pop'); }
+        }
+      }
+      prevFound = task.found;
+      updateResults(task.results);
+      updateLog(task);
+      if (task.status === 'done') {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        document.getElementById('statusText').textContent = '扫描完成';
+        document.getElementById('statusBadge').className = 'progress-status done';
+        document.getElementById('riskGuide').style.display = 'block';
+        document.getElementById('exportPanel').style.display = 'block';
+        showToast(`扫描完成：发现 ${task.found} 条结果`, 'success');
+        resetBtn();
+      }
+    } catch (e) {}
+  }, 500);
+}
+
+function updateResults(results) {
+  if (results.length === allResults.length) return;
+  allResults = results;
+  renderResults(allResults);
+}
+
+function renderResults(results) {
+  const tbody = document.getElementById('resultsBody');
+  if (!results.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px;">等待扫描结果...</td></tr>';
+    return;
+  }
+  const maxDelay = Math.min(results.length * 30, 300);
+  tbody.innerHTML = results.map((r, idx) => {
+    const cls = r.risk_level === '高风险' ? 'high' : r.risk_level === '中风险' ? 'med' : 'low';
+    const delay = Math.min(idx * 30, 300);
+    return `<tr style="animation-delay:${delay}ms">
+      <td>${r.status_code}</td>
+      <td><span class="badge badge-${cls}">${r.risk_level}</span></td>
+      <td style="color:var(--text-secondary)">${r.risk_type}</td>
+      <td><a href="${r.url}" target="_blank" rel="noreferrer">${r.url}</a></td>
+      <td style="color:var(--text-secondary)">${r.size} B</td>
+      <td style="color:var(--text-muted)">${r.content_type}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterResults(level, btn) {
+  document.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderResults(level === 'all' ? allResults : allResults.filter(r => r.risk_level === level));
+}
+
+function exportReport(format) {
+  if (!currentTaskId) {
+    showToast('没有可导出的报告', 'error');
+    return;
+  }
+  if (!format) format = 'html';
+  var url = '/api/scan/' + currentTaskId + '/report?format=' + format;
+  // 使用隐藏 <a> 触发下载，避免弹窗拦截
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function() { document.body.removeChild(a); }, 100);
+  showToast('正在导出 ' + format.toUpperCase() + ' 报告...', 'success');
+}
+
+function updateLog(task) {
+  const body = document.getElementById('logBody');
+  const results = task.results;
+  if (results.length <= lastLogCount) return;
+  for (let i = lastLogCount; i < results.length; i++) {
+    const r = results[i];
+    const now = new Date().toLocaleTimeString('zh-CN', {hour12: false});
+    const codeCls = r.status_code < 300 ? 'c2xx' : r.status_code < 400 ? 'c3xx' : r.status_code < 500 ? 'c4xx' : 'c5xx';
+    const tagCls = r.risk_level === '高风险' ? 't-high' : r.risk_level === '中风险' ? 't-med' : 't-low';
+    const line = document.createElement('div');
+    line.className = 'log-line';
+    line.innerHTML = `
+      <span class="log-time">${now}</span>
+      <span class="log-code ${codeCls}">${r.status_code}</span>
+      <span class="log-url">${r.url}</span>
+      <span class="log-tag ${tagCls}">${r.risk_type}</span>
+    `;
+    body.appendChild(line);
+    logQueue.push({line: line});
+  }
+  lastLogCount = results.length;
+  body.scrollTop = body.scrollHeight;
+  processLogQueue();
+}
+
+async function loadRiskInfo() {
+  const resp = await fetch('/api/risk-info');
+  const data = await resp.json();
+  const levels = [
+    {key: '高风险', cls: 'high', lv: 'lv-high'},
+    {key: '中风险', cls: 'med', lv: 'lv-med'},
+    {key: '低风险', cls: 'low', lv: 'lv-low'},
+  ];
+  let html = '';
+  levels.forEach(({key, cls, lv}) => {
+    const info = data[key];
+    html += `<div class="risk-group r-${cls}" onclick="this.classList.toggle('open')">
+      <div class="risk-group-head">
+        <span class="risk-group-level ${lv}">${key}</span>
+        <span style="font-size:12px;color:var(--text-secondary);">${info.description}</span>
+        <span class="toggle-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="risk-group-body">
+        <ul class="risk-items">`;
+    for (const [type, val] of Object.entries(info.types)) {
+      html += `<li><span class="dot"></span><span><b>${type}</b>：${val.desc}</span></li>`;
+    }
+    html += `</ul></div></div>`;
+  });
+  document.getElementById('riskInfoContent').innerHTML = html;
+}
+
+function resetBtn() {
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = false;
+  btn.style.animation = '';
+  btn.innerHTML = '<span class="ripple"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polygon points="5 3 19 12 5 21 5 3"/></svg> 开始扫描';
+}
+
+// === TABS ===
+function switchTab(tabId, el) {
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+}
+
+// === TESTSITE ===
+async function toggleTestsite() {
+  const btn = document.getElementById('testsiteBtn');
+  const text = document.getElementById('testsiteBtnText');
+  btn.disabled = true;
+  text.textContent = '处理中...';
+
+  try {
+    // 先检查状态
+    const statusResp = await fetch('/api/testsite/status');
+    const status = await statusResp.json();
+
+    // Docker 模式: 靶场作为独立容器运行，点击直接打开
+    if (status.docker) {
+      btn.style.background = 'rgba(0,255,136,0.08)';
+      btn.style.borderColor = 'rgba(0,255,136,0.3)';
+      btn.style.color = '#00ff88';
+      text.textContent = '靶场运行中';
+      const siteUrl = 'http://' + window.location.hostname + ':' + status.port;
+      // 用 <a> 标签点击触发跳转，避免弹窗拦截
+      var link = document.createElement('a');
+      link.href = siteUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      btn.disabled = false;
+      return;
+    }
+
+    if (status.running) {
+      // 停止靶场
+      await fetch('/api/testsite/stop', { method: 'POST' });
+      btn.style.background = '#0d1117';
+      btn.style.borderColor = '#1e293b';
+      btn.style.color = '#00d4ff';
+      text.textContent = '启动靶场';
+      showToast('靶场已停止', 'success');
+    } else {
+      // 启动靶场
+      const resp = await fetch('/api/testsite/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ port: 5001 }),
+      });
+      const data = await resp.json();
+      if (data.success) {
+        btn.style.background = 'rgba(0,255,136,0.08)';
+        btn.style.borderColor = 'rgba(0,255,136,0.3)';
+        btn.style.color = '#00ff88';
+        text.textContent = '靶场运行中';
+        const siteUrl = 'http://' + window.location.hostname + ':' + data.port;
+        showToast('靶场已启动: ' + siteUrl, 'success');
+        var link = document.createElement('a');
+        link.href = siteUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        showToast('启动失败: ' + data.error, 'error');
+        text.textContent = '启动靶场';
+      }
+    }
+  } catch (e) {
+    showToast('操作失败: ' + e.message, 'error');
+    text.textContent = '启动靶场';
+  }
+  btn.disabled = false;
+}
+
+// 页面加载时检查靶场状态
+async function checkTestsiteStatus() {
+  try {
+    const resp = await fetch('/api/testsite/status');
+    const status = await resp.json();
+    const btn = document.getElementById('testsiteBtn');
+    const text = document.getElementById('testsiteBtnText');
+    if (status.running) {
+      btn.style.background = 'rgba(0,255,136,0.08)';
+      btn.style.borderColor = 'rgba(0,255,136,0.3)';
+      btn.style.color = '#00ff88';
+      text.textContent = '靶场运行中';
+    }
+  } catch (e) {}
+}
+
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  document.body.classList.toggle('light-theme');
+  var isLight = document.body.classList.contains('light-theme');
+  localStorage.setItem('ls-theme', isLight ? 'light' : 'dark');
+  updateThemeIcon(isLight);
+}
+function updateThemeIcon(isLight) {
+  var icon = document.getElementById('themeIcon');
+  if (isLight) {
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  } else {
+    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  }
+}
+function initTheme() {
+  var saved = localStorage.getItem('ls-theme');
+  if (saved === 'light') {
+    document.body.classList.add('light-theme');
+    updateThemeIcon(true);
+  }
+}
+
+// ===== IMPORT DICT FILE =====
+async function importDictFile(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var name = file.name.replace(/\.[^.]+$/, '');
+  var content = await file.text();
+  try {
+    var resp = await fetch('/api/wordlist/create', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: name, content: content}),
+    });
+    var data = await resp.json();
+    if (data.success) {
+      showToast('字典已导入: ' + data.path, 'success');
+      await loadWordlists();
+      document.getElementById('wordlist').value = data.path;
+      loadWordlistContent();
+    } else {
+      showToast('导入失败: ' + data.error, 'error');
+    }
+  } catch (e) {
+    showToast('导入失败: ' + e.message, 'error');
+  }
+  input.value = '';
+}
+
+// ===== OVERRIDE POLL PROGRESS =====
+pollProgress = function() {
+  if (!currentTaskId) return;
+  var prevFound = 0;
+  pollTimer = setInterval(async function() {
+    try {
+      var resp = await fetch('/api/scan/' + currentTaskId);
+      var task = await resp.json();
+      var pct = task.total > 0 ? Math.round(task.completed / task.total * 100) : 0;
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressPct').textContent = pct + '%';
+      animateCount(document.getElementById('statTotal'), task.total, 400);
+      animateCount(document.getElementById('statFound'), task.found, 500);
+      animateCount(document.getElementById('statErrors'), task.errors, 400);
+      var hc = 0;
+      task.results.forEach(function(r) { if (r.risk_level === '高风险') hc++; });
+      animateCount(document.getElementById('statHigh'), hc, 500);
+      if (task.found > prevFound) {
+        var foundCell = document.querySelector('.stat-cell.s-found');
+        if (foundCell) { foundCell.classList.remove('pop'); void foundCell.offsetWidth; foundCell.classList.add('pop'); }
+        if (hc > 0) {
+          var highCell = document.querySelector('.stat-cell.s-high');
+          if (highCell) { highCell.classList.remove('pop'); void highCell.offsetWidth; highCell.classList.add('pop'); }
+        }
+      }
+      prevFound = task.found;
+      updateResults(task.results);
+      updateLog(task);
+      if (task.status === 'done') {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        document.getElementById('statusText').textContent = '扫描完成';
+        document.getElementById('statusBadge').className = 'progress-status done';
+        document.getElementById('riskGuide').style.display = 'block';
+        document.getElementById('exportPanel').style.display = 'block';
+        showToast('扫描完成：发现 ' + task.found + ' 条结果', 'success');
+        resetBtn();
+      }
+    } catch (e) {}
+  }, 500);
+};
+
+// ===== CARD DETAIL MODAL =====
+var cardData = {
+  architecture: {
+    title: '系统整体架构图', tag: 'UML Package',
+    iconBg: 'rgba(0,212,255,0.1)', iconColor: '#00d4ff',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',
+    desc: '展示系统各层之间的调用关系与数据流向。架构分为四层：用户交互层（浏览器）、Web UI 层（Flask 前端）、核心引擎层（扫描器、分类器、字典引擎）、数据资源层（字典文件、配置、报告）。每层通过明确的接口通信，确保模块解耦。',
+    specs: [
+      {label: '图表类型', value: 'UML Package Diagram'},
+      {label: '层数', value: '4 层架构'},
+      {label: '核心模块', value: 'WebScanner, Classifier'},
+      {label: '外部依赖', value: 'requests 库'}
+    ]
+  },
+  functional: {
+    title: '功能结构图', tag: 'Functional',
+    iconBg: 'rgba(0,255,136,0.1)', iconColor: '#00ff88',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+    desc: '扫描功能的模块分解，展示各子功能的层次关系。主要分为目标配置（URL 输入、参数设置）、字典管理（加载、编辑、预览）、扫描执行（多线程并发、状态监控）、结果展示（实时日志、统计面板、风险分类）四大模块。',
+    specs: [
+      {label: '图表类型', value: '功能分解图'},
+      {label: '主模块数', value: '4 个'},
+      {label: '子功能', value: '12+ 项'},
+      {label: '交互方式', value: 'Web UI 操作'}
+    ]
+  },
+  class: {
+    title: 'UML 类图', tag: 'UML Class',
+    iconBg: 'rgba(255,165,2,0.1)', iconColor: '#ffa502',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/></svg>',
+    desc: '核心类 WebScanner、ScanResult、ScanStats 的属性、方法及类间关系。WebScanner 包含 check_path() 和 scan() 方法；ScanResult 存储单条扫描结果（路径、状态码、风险等级）；ScanStats 记录扫描统计（总数、发现数、错误数）。',
+    specs: [
+      {label: '核心类', value: '3 个'},
+      {label: 'WebScanner 方法', value: 'check_path(), scan()'},
+      {label: 'ScanResult 属性', value: '7 个字段'},
+      {label: 'ScanStats 属性', value: '4 个字段'}
+    ]
+  },
+  dataflow: {
+    title: '扫描流程 / 数据流图', tag: 'Sequence',
+    iconBg: 'rgba(255,71,87,0.1)', iconColor: '#ff4757',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    desc: '从用户输入参数到生成报告的完整时序交互。流程：用户配置参数 → Flask 接收 → 字典展开 → 线程池并发扫描 → 每个路径执行 check_path() → 风险分类 → 结果汇总 → 生成 HTML 报告。',
+    specs: [
+      {label: '图表类型', value: '时序图'},
+      {label: '参与对象', value: '5 个'},
+      {label: '关键流程', value: '请求→分类→汇总'},
+      {label: '并发模型', value: 'ThreadPoolExecutor'}
+    ]
+  },
+  er: {
+    title: 'E-R 数据模型图', tag: 'ER Diagram',
+    iconBg: 'rgba(0,212,255,0.08)', iconColor: '#00d4ff',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>',
+    desc: '8 个实体之间的关系与属性定义。核心实体 SCAN_TASK 为中心，关联字典、候选路径、扫描结果、统计数据和报告。展示了一对多、一对一的关系约束。',
+    specs: [
+      {label: '实体数', value: '8 个'},
+      {label: '关系数', value: '8 条'},
+      {label: '核心实体', value: 'SCAN_TASK'},
+      {label: '关系类型', value: '1--*, 1--1'}
+    ]
+  },
+  check_path: {
+    title: 'check_path() 流程图', tag: 'Flowchart',
+    iconBg: 'rgba(0,255,136,0.08)', iconColor: '#00ff88',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+    desc: 'scanner.py 中核心函数的执行流程：接收路径参数 → 构建完整 URL → 发送 HTTP GET 请求 → 判断状态码（200/301/403/404/500）→ 调用 check_risk() 分类 → 构建 ScanResult 对象 → 异常捕获与错误处理。',
+    specs: [
+      {label: '函数位置', value: 'scanner.py'},
+      {label: 'HTTP 方法', value: 'GET (allow_redirects=False)'},
+      {label: '风险分类', value: 'check_risk() 调用'},
+      {label: '异常处理', value: 'try/except 捕获'}
+    ]
+  },
+  risk_decision: {
+    title: 'check_risk() 风险分类决策树', tag: 'Decision Tree',
+    iconBg: 'rgba(255,71,87,0.08)', iconColor: '#ff4757',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    desc: 'classifier.py 中风险判定的完整决策逻辑。通过路径特征匹配（.git、backup、.env、.sql、phpinfo、admin 等关键词）判定风险类型和等级，分为高风险（敏感文件泄露）、中风险（信息泄露）、低风险（常规发现）。',
+    specs: [
+      {label: '风险等级', value: '3 级（高/中/低）'},
+      {label: '匹配方式', value: '路径关键词匹配'},
+      {label: '高风险特征', value: '.git, .env, backup, .sql'},
+      {label: '中风险特征', value: 'phpinfo, log, test, setup'}
+    ]
+  },
+  requests_flow: {
+    title: 'requests 库 HTTP 请求流程', tag: 'Sequence + Source',
+    iconBg: 'rgba(0,212,255,0.08)', iconColor: '#00d4ff',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+    desc: 'scanner.py 中 requests.get() 的完整调用链：DNS 解析 → TCP 三次握手 → TLS 握手（HTTPS）→ 发送 HTTP 请求 → 接收响应 → 解析状态码/头部/内容 → 异常捕获（ConnectionError, Timeout）→ 返回 Response 对象。',
+    specs: [
+      {label: '库', value: 'requests 2.32.5'},
+      {label: '方法', value: 'requests.get()'},
+      {label: '超时', value: '可配置（默认5秒）'},
+      {label: '异常类型', value: 'ConnectionError, Timeout'}
+    ]
+  },
+  deployment: {
+    title: '系统部署架构图', tag: 'Deployment',
+    iconBg: 'rgba(100,116,139,0.1)', iconColor: '#94a3b8',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    desc: 'B/S 三层架构部署：浏览器前端（用户交互）→ Flask 后端服务（gunicorn 2 workers + 4 threads）→ 数据资源层（字典、配置、报告）及外部目标服务器。支持 Docker Compose 多容器部署和 PyInstaller 单文件打包。',
+    specs: [
+      {label: '架构', value: 'B/S 三层'},
+      {label: '服务器', value: 'gunicorn + Flask'},
+      {label: '容器化', value: 'Docker Compose'},
+      {label: '打包', value: 'PyInstaller --onefile'}
+    ]
+  },
+  scan_workflow: {
+    title: '扫描执行流程图', tag: 'Flowchart',
+    iconBg: 'rgba(100,116,139,0.1)', iconColor: '#94a3b8',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>',
+    desc: '从用户启动扫描到生成报告的完整流程：参数校验 → URL 格式修正 → 字典文件读取 → %EXT% 占位符展开 → 线程池并发执行 check_path() → 结果按风险等级排序 → 生成 HTML 报告文件。',
+    specs: [
+      {label: '入口', value: 'POST /api/scan'},
+      {label: '线程池', value: 'ThreadPoolExecutor'},
+      {label: '排序', value: '风险等级优先'},
+      {label: '输出', value: 'HTML 报告'}
+    ]
+  },
+  module_dep: {
+    title: '模块依赖关系图', tag: 'Dependency',
+    iconBg: 'rgba(100,116,139,0.1)', iconColor: '#94a3b8',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>',
+    desc: 'listscanner 包内各模块的 import 调用关系。scanner.py 依赖 classifier、models、wordlist；webapp.py 依赖 scanner、classifier、models、wordlist、report、config；cli.py 依赖 scanner、config。模块间低耦合高内聚。',
+    specs: [
+      {label: '模块数', value: '7 个'},
+      {label: '核心模块', value: 'scanner.py'},
+      {label: '入口模块', value: 'webapp.py / cli.py'},
+      {label: '依赖深度', value: '2 层'}
+    ]
+  }
+};
+
+function openCardDetail(event, el) {
+  event.preventDefault();
+  var cardId = el.getAttribute('data-card');
+  var data = cardData[cardId];
+  if (!data) return;
+
+  document.getElementById('cdIcon').innerHTML = data.icon;
+  document.getElementById('cdIcon').style.background = data.iconBg;
+  document.getElementById('cdIcon').style.color = data.iconColor;
+  document.getElementById('cdTitle').textContent = data.title;
+  document.getElementById('cdTag').textContent = data.tag;
+
+  var specsHtml = data.specs.map(function(s) {
+    return '<div class="cd-spec"><div class="cd-spec-label">' + s.label + '</div><div class="cd-spec-value">' + s.value + '</div></div>';
+  }).join('');
+
+  var href = el.getAttribute('href');
+  document.getElementById('cdBody').innerHTML =
+    '<p>' + data.desc + '</p>' +
+    '<div class="cd-specs">' + specsHtml + '</div>' +
+    '<a class="cd-link" href="' + href + '" target="_blank">' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+    '在新窗口中打开图表</a>';
+
+  document.getElementById('cardDetailOverlay').classList.add('show');
+}
+
+function closeCardDetail(event) {
+  if (event && event.target !== document.getElementById('cardDetailOverlay')) return;
+  document.getElementById('cardDetailOverlay').classList.remove('show');
+}
+
+// ESC to close card detail
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeCardDetail();
+  }
+});
+
+// ===== INIT =====
+initTheme();
+init();
+checkTestsiteStatus();
+</script>
+</body>
+</html>

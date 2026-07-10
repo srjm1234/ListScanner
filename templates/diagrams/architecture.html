@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系统整体架构图 - ListScanner</title>
+<style>
+  @page { size: A4 landscape; margin: 15mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    background: #fff; color: #1a1a2e;
+    padding: 40px; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .page-header {
+    text-align: center; margin-bottom: 32px; width: 100%; max-width: 1100px;
+  }
+  .page-header h1 {
+    font-size: 22px; font-weight: 700; color: #1a1a2e;
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .page-header .subtitle {
+    font-size: 13px; color: #666;
+  }
+  .diagram-wrap {
+    background: #fff; border: 1.5px solid #d1d5db;
+    border-radius: 8px; padding: 32px; width: 100%; max-width: 1100px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .diagram-wrap .mermaid { text-align: center; }
+  .toolbar {
+    position: fixed; top: 16px; right: 16px;
+    display: flex; gap: 8px; z-index: 100;
+  }
+  .toolbar button {
+    padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 6px;
+    background: #fff; color: #374151; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .toolbar button:hover { background: #f3f4f6; border-color: #9ca3af; }
+  .toolbar button.primary { background: #333; color: #fff; border-color: #333; }
+  .toolbar button.primary:hover { background: #222; }
+  .footer {
+    margin-top: 24px; font-size: 11px; color: #9ca3af; text-align: center;
+  }
+  @media print {
+    body { padding: 0; }
+    .toolbar { display: none; }
+    .diagram-wrap { border: 1px solid #ccc; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button onclick="window.print()">打印 / 导出PDF</button>
+  <button class="primary" onclick="copyDiagram()">复制图表</button>
+</div>
+<div class="page-header">
+  <h1>系统整体架构图</h1>
+  <div class="subtitle">ListScanner Web路径扫描工具 - UML Package Diagram</div>
+</div>
+<div class="diagram-wrap">
+  <div class="mermaid">
+graph TB
+    subgraph 用户层
+        CLI["应用程序<br/><i>ListScanner.exe</i>"]
+        WEB["WebUI 浏览器<br/><i>webapp.py + index.html</i>"]
+    end
+    subgraph 核心引擎
+        SCANNER["扫描器<br/><i>scanner.py</i><br/>WebScanner"]
+        CLASSIFIER["风险分类器<br/><i>classifier.py</i><br/>check_risk()"]
+        WORDLIST["字典处理器<br/><i>wordlist.py</i><br/>read_wordlist()"]
+    end
+    subgraph 数据层
+        MODELS["数据模型<br/><i>models.py</i><br/>ScanResult / ScanStats"]
+        CONFIG["配置管理<br/><i>config.py</i><br/>config.ini"]
+        REPORT["报告生成器<br/><i>report.py</i><br/>HTML Report"]
+    end
+    subgraph 外部资源
+        DICT["字典文件<br/>dictionary/*.txt"]
+        TARGET["目标网站<br/>HTTP Server"]
+    end
+
+    CLI --> SCANNER
+    WEB -->|REST API| SCANNER
+    SCANNER --> CLASSIFIER
+    SCANNER --> WORDLIST
+    WORDLIST --> DICT
+    SCANNER -->|HTTP GET| TARGET
+    SCANNER --> MODELS
+    REPORT --> MODELS
+    CONFIG --> CLI
+    CONFIG --> WEB
+  </div>
+</div>
+<div class="footer">ListScanner 毕业设计项目 - 系统架构图</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#f5f5f5',
+    primaryTextColor: '#1a1a1a',
+    primaryBorderColor: '#555',
+    lineColor: '#555',
+    secondaryColor: '#f0f0f0',
+    tertiaryColor: '#f8f8f8',
+    fontFamily: '"Microsoft YaHei", Arial, sans-serif',
+    fontSize: '13px'
+  }
+});
+function copyDiagram() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const svgData = new XMLSerializer().serializeToString(svg);
+  navigator.clipboard.writeText(svgData).then(() => alert('SVG 已复制到剪贴板'));
+}
+</script>
+</body>
+</html>

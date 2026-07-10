@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>check_path() 函数流程 - ListScanner</title>
+<style>
+  @page { size: A4 portrait; margin: 15mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    background: #fff; color: #1a1a1a;
+    padding: 40px; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .page-header {
+    text-align: center; margin-bottom: 28px; width: 100%; max-width: 800px;
+  }
+  .page-header h1 {
+    font-size: 22px; font-weight: 700; color: #1a1a1a;
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .page-header .subtitle {
+    font-size: 13px; color: #666;
+  }
+  .diagram-wrap {
+    background: #fff; border: 1.5px solid #999;
+    border-radius: 6px; padding: 28px; width: 100%; max-width: 800px;
+  }
+  .diagram-wrap .mermaid { text-align: center; }
+  .toolbar {
+    position: fixed; top: 16px; right: 16px;
+    display: flex; gap: 8px; z-index: 100;
+    flex-direction: column; align-items: flex-end;
+  }
+  .toolbar-row { display: flex; gap: 8px; }
+  .toolbar button {
+    padding: 8px 16px; border: 1px solid #999; border-radius: 4px;
+    background: #fff; color: #333; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .toolbar button:hover { background: #eee; }
+  .toolbar button.primary { background: #333; color: #fff; border-color: #333; }
+  .toolbar button.primary:hover { background: #111; }
+  .toolbar button.active { background: #555; color: #fff; border-color: #555; }
+  .line-panel {
+    background: #fff; border: 1px solid #999; border-radius: 6px;
+    padding: 12px 16px; font-size: 12px; color: #555;
+    display: none; min-width: 200px;
+  }
+  .line-panel.show { display: block; }
+  .line-panel h4 { font-size: 13px; color: #333; margin-bottom: 10px; font-weight: 600; }
+  .line-panel label {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px; cursor: pointer;
+  }
+  .line-panel input[type="radio"] { accent-color: #333; }
+  .line-panel input[type="range"] { width: 100%; accent-color: #333; }
+  .line-panel .range-row { margin-top: 8px; }
+  .line-panel .range-val { font-family: monospace; font-weight: 600; color: #333; }
+  .footer {
+    margin-top: 24px; font-size: 11px; color: #999; text-align: center;
+  }
+  @media print {
+    body { padding: 0; }
+    .toolbar { display: none; }
+    .diagram-wrap { border: 1px solid #ccc; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <div class="toolbar-row">
+    <button onclick="window.print()">打印 / 导出PDF</button>
+    <button class="primary" onclick="copyDiagram()">复制图表</button>
+    <button onclick="togglePanel()">连线调整</button>
+  </div>
+  <div class="line-panel" id="linePanel">
+    <h4>连线样式</h4>
+    <label><input type="radio" name="lineStyle" value="straight" onchange="applyLineStyle()"> 直线</label>
+    <label><input type="radio" name="lineStyle" value="curve" checked onchange="applyLineStyle()"> 曲线</label>
+    <label><input type="radio" name="lineStyle" value="dashed" onchange="applyLineStyle()"> 虚线</label>
+    <div class="range-row">
+      <span>线条粗细：</span>
+      <input type="range" id="strokeWidth" min="1" max="4" value="2" step="0.5" onchange="applyLineWidth(this.value)">
+      <span class="range-val" id="widthVal">2</span>px
+    </div>
+    <div class="range-row">
+      <span>箭头大小：</span>
+      <input type="range" id="arrowSize" min="6" max="14" value="8" step="1" onchange="applyArrowSize(this.value)">
+      <span class="range-val" id="arrowVal">8</span>px
+    </div>
+    <div style="margin-top:10px;">
+      <button onclick="fixDiamondArrows()" style="padding:4px 12px;border:1px solid #999;border-radius:3px;background:#fff;cursor:pointer;font-size:12px;">修正菱形箭头</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-header">
+  <h1>check_path() 函数流程</h1>
+  <div class="subtitle">ListScanner - scanner.py 核心函数流程图</div>
+</div>
+<div class="diagram-wrap">
+  <div class="mermaid">
+graph TD
+    A(["check_path(path) 开始"])
+    B[/"url = urljoin(target, path)"/]
+    C["requests.get(url, timeout)"]
+    D{"status == 404?"}
+    E(["返回 (None, error/错误)"])
+    F(["返回 (None, not_found/未找到)"])
+    G["check_risk(path)"]
+    H["构建 ScanResult"]
+    I(["返回 (result, found/已发现)"])
+
+    A --> B
+    B --> C
+    C -->|成功| D
+    C -->|异常| E
+    D -->|是| F
+    D -->|否| G
+    G --> H
+    H --> I
+
+    style A fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#1a1a1a
+    style B fill:#fafafa,stroke:#666,stroke-width:1.5px,color:#333
+    style C fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style D fill:#fff,stroke:#444,stroke-width:2px,color:#1a1a1a
+    style E fill:#e8e8e8,stroke:#888,stroke-width:1.5px,color:#333
+    style F fill:#e8e8e8,stroke:#888,stroke-width:1.5px,color:#333
+    style G fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style H fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style I fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#1a1a1a
+  </div>
+</div>
+
+<div style="margin-top:16px;width:100%;max-width:800px;display:flex;gap:20px;font-size:12px;color:#555;justify-content:center;flex-wrap:wrap;">
+  <span><span style="display:inline-block;width:24px;height:14px;border:1.5px solid #333;border-radius:10px;vertical-align:middle;margin-right:4px;"></span> 圆角矩形 — 开始 / 结束</span>
+  <span><span style="display:inline-block;width:24px;height:14px;border:1.5px solid #666;background:#fafafa;vertical-align:middle;margin-right:4px;"></span> 平行四边形 — 输入 / 输出数据</span>
+  <span><span style="display:inline-block;width:24px;height:14px;border:1.5px solid #555;vertical-align:middle;margin-right:4px;"></span> 矩形 — 处理步骤</span>
+  <span><span style="display:inline-block;width:14px;height:14px;border:1.5px solid #444;transform:rotate(45deg);vertical-align:middle;margin-right:4px;"></span> 菱形 — 判断 / 分支</span>
+</div>
+<div class="footer">ListScanner 毕业设计项目 - check_path() 流程图</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#f5f5f5',
+    primaryTextColor: '#1a1a1a',
+    primaryBorderColor: '#555',
+    lineColor: '#555',
+    secondaryColor: '#f0f0f0',
+    tertiaryColor: '#f8f8f8',
+    fontFamily: '"Microsoft YaHei", Arial, sans-serif',
+    fontSize: '13px'
+  }
+});
+
+// === 连线控制面板 ===
+function togglePanel() {
+  document.getElementById('linePanel').classList.toggle('show');
+}
+
+function applyLineStyle() {
+  const style = document.querySelector('input[name="lineStyle"]:checked').value;
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const edges = svg.querySelectorAll('.edgePath path, .edgePaths path');
+  edges.forEach(p => {
+    p.removeAttribute('stroke-dasharray');
+    if (style === 'dashed') {
+      p.setAttribute('stroke-dasharray', '6,4');
+    }
+    if (style === 'straight') {
+      p.setAttribute('data-curve', 'linear');
+    } else {
+      p.removeAttribute('data-curve');
+    }
+  });
+}
+
+function applyLineWidth(val) {
+  document.getElementById('widthVal').textContent = val;
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  svg.querySelectorAll('.edgePath path, .edgePaths path').forEach(p => {
+    p.setAttribute('stroke-width', val);
+  });
+}
+
+function applyArrowSize(val) {
+  document.getElementById('arrowVal').textContent = val;
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  svg.querySelectorAll('marker path, marker polygon').forEach(m => {
+    m.setAttribute('stroke-width', val / 4);
+  });
+  svg.querySelectorAll('.edgePath path').forEach(p => {
+    p.setAttribute('stroke-width', document.getElementById('strokeWidth').value);
+  });
+}
+
+// === 菱形箭头修正 ===
+function fixDiamondArrows() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+
+  // 找到所有菱形节点（polygon，4个点）
+  const diamonds = [];
+  svg.querySelectorAll('.node polygon, .nodes polygon').forEach(poly => {
+    const pts = poly.getAttribute('points');
+    if (!pts) return;
+    const coords = pts.trim().split(/\s+/).map(p => {
+      const [x, y] = p.split(',').map(Number);
+      return { x, y };
+    });
+    if (coords.length === 4) {
+      const g = poly.closest('g');
+      const transform = g ? g.getAttribute('transform') : '';
+      let tx = 0, ty = 0;
+      if (transform) {
+        const m = transform.match(/translate\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/);
+        if (m) { tx = parseFloat(m[1]); ty = parseFloat(m[2]); }
+      }
+      diamonds.push({
+        corners: coords.map(c => ({ x: c.x + tx, y: c.y + ty })),
+        el: poly
+      });
+    }
+  });
+
+  if (diamonds.length === 0) return;
+
+  // 找到所有连线路径
+  const edgePaths = svg.querySelectorAll('.edgePath path, .edgePaths path');
+  let fixed = 0;
+
+  edgePaths.forEach(path => {
+    const d = path.getAttribute('d');
+    if (!d) return;
+
+    // 解析路径的第一个坐标点
+    const firstMove = d.match(/M\s*([-\d.]+)\s+([-\d.]+)/);
+    if (!firstMove) return;
+    const startX = parseFloat(firstMove[1]);
+    const startY = parseFloat(firstMove[2]);
+
+    // 检查起点是否靠近某个菱形
+    for (const diamond of diamonds) {
+      const nearestCorner = findNearestCorner(startX, startY, diamond.corners);
+      if (nearestCorner.dist < 30) {
+        // 将路径起点移动到菱形角上
+        const newD = d.replace(
+          /M\s*([-\d.]+)\s+([-\d.]+)/,
+          `M ${nearestCorner.x.toFixed(1)} ${nearestCorner.y.toFixed(1)}`
+        );
+        path.setAttribute('d', newD);
+        fixed++;
+        break;
+      }
+    }
+  });
+
+  if (fixed > 0) {
+    const btn = document.querySelector('.line-panel button:last-child');
+    if (btn) { btn.textContent = `已修正 ${fixed} 条`; setTimeout(() => btn.textContent = '修正菱形箭头', 2000); }
+  }
+}
+
+function findNearestCorner(x, y, corners) {
+  let minDist = Infinity;
+  let nearest = corners[0];
+  corners.forEach(c => {
+    const dist = Math.sqrt((c.x - x) ** 2 + (c.y - y) ** 2);
+    if (dist < minDist) { minDist = dist; nearest = c; }
+  });
+  return { x: nearest.x, y: nearest.y, dist: minDist };
+}
+
+// 渲染后自动修正
+setTimeout(fixDiamondArrows, 500);
+
+function copyDiagram() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const svgData = new XMLSerializer().serializeToString(svg);
+  navigator.clipboard.writeText(svgData).then(() => alert('SVG 已复制到剪贴板'));
+}
+</script>
+</body>
+</html>

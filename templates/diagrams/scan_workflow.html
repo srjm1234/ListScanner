@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>扫描执行流程图 - ListScanner</title>
+<style>
+  @page { size: A4 portrait; margin: 15mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    background: #fff; color: #1a1a1a;
+    padding: 40px; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .page-header {
+    text-align: center; margin-bottom: 28px; width: 100%; max-width: 800px;
+  }
+  .page-header h1 {
+    font-size: 22px; font-weight: 700; color: #1a1a1a;
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .page-header .subtitle {
+    font-size: 13px; color: #666;
+  }
+  .diagram-wrap {
+    background: #fff; border: 1.5px solid #999;
+    border-radius: 6px; padding: 28px; width: 100%; max-width: 800px;
+  }
+  .diagram-wrap .mermaid { text-align: center; }
+  .step-table {
+    margin-top: 24px; width: 100%; max-width: 800px;
+    border-collapse: collapse; font-size: 13px;
+  }
+  .step-table th, .step-table td {
+    border: 1px solid #bbb; padding: 8px 12px; text-align: left;
+  }
+  .step-table th {
+    background: #e8e8e8; color: #222; font-weight: 600;
+  }
+  .step-table td { color: #333; }
+  .step-table tr:nth-child(even) td { background: #f7f7f7; }
+  .step-num {
+    display: inline-block; width: 22px; height: 22px;
+    border: 1.5px solid #555; border-radius: 50%;
+    text-align: center; line-height: 22px;
+    font-size: 11px; font-weight: 700; color: #333;
+  }
+  .toolbar {
+    position: fixed; top: 16px; right: 16px;
+    display: flex; gap: 8px; z-index: 100;
+    flex-direction: column; align-items: flex-end;
+  }
+  .toolbar-row { display: flex; gap: 8px; }
+  .toolbar button {
+    padding: 8px 16px; border: 1px solid #999; border-radius: 4px;
+    background: #fff; color: #333; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .toolbar button:hover { background: #eee; }
+  .toolbar button.primary { background: #333; color: #fff; border-color: #333; }
+  .toolbar button.primary:hover { background: #111; }
+  .line-panel {
+    background: #fff; border: 1px solid #999; border-radius: 6px;
+    padding: 12px 16px; font-size: 12px; color: #555;
+    display: none; min-width: 200px;
+  }
+  .line-panel.show { display: block; }
+  .line-panel h4 { font-size: 13px; color: #333; margin-bottom: 10px; font-weight: 600; }
+  .line-panel label {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px; cursor: pointer;
+  }
+  .line-panel input[type="radio"] { accent-color: #333; }
+  .line-panel input[type="range"] { width: 100%; accent-color: #333; }
+  .line-panel .range-row { margin-top: 8px; }
+  .line-panel .range-val { font-family: monospace; font-weight: 600; color: #333; }
+  .footer {
+    margin-top: 20px; font-size: 11px; color: #999; text-align: center;
+  }
+  @media print {
+    body { padding: 0; }
+    .toolbar { display: none; }
+    .diagram-wrap { border: 1px solid #ccc; box-shadow: none; }
+    .step-table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <div class="toolbar-row">
+    <button onclick="window.print()">打印 / 导出PDF</button>
+    <button class="primary" onclick="copyDiagram()">复制图表</button>
+    <button onclick="togglePanel()">连线调整</button>
+  </div>
+  <div class="line-panel" id="linePanel">
+    <h4>连线样式</h4>
+    <label><input type="radio" name="lineStyle" value="straight" onchange="applyLineStyle()"> 直线</label>
+    <label><input type="radio" name="lineStyle" value="curve" checked onchange="applyLineStyle()"> 曲线</label>
+    <label><input type="radio" name="lineStyle" value="dashed" onchange="applyLineStyle()"> 虚线</label>
+    <div class="range-row">
+      <span>线条粗细：</span>
+      <input type="range" id="strokeWidth" min="1" max="4" value="2" step="0.5" onchange="applyLineWidth(this.value)">
+      <span class="range-val" id="widthVal">2</span>px
+    </div>
+    <div class="range-row">
+      <span>箭头大小：</span>
+      <input type="range" id="arrowSize" min="6" max="14" value="8" step="1" onchange="applyArrowSize(this.value)">
+      <span class="range-val" id="arrowVal">8</span>px
+    </div>
+    <div style="margin-top:10px;">
+      <button onclick="fixDiamondArrows()" style="padding:4px 12px;border:1px solid #999;border-radius:3px;background:#fff;cursor:pointer;font-size:12px;">修正菱形箭头</button>
+    </div>
+  </div>
+</div>
+<div class="page-header">
+  <h1>扫描执行流程图</h1>
+  <div class="subtitle">ListScanner — 从启动扫描到生成报告的完整流程</div>
+</div>
+<div class="diagram-wrap">
+  <div class="mermaid">
+graph TD
+    START(["开始扫描"])
+    INPUT[/"读取用户输入<br/>目标URL · 字典 · 扩展名 · 线程数 · 超时"/]
+    VALIDATE{"URL 是否合法?"}
+    ERROR1(["返回错误提示"])
+    FIX["fix_url() 补全协议和斜杠"]
+    READ[/"read_wordlist() 读取字典<br/>展开 %EXT% 占位符<br/>生成扩展名变体"/]
+    CHECK{"字典是否为空?"}
+    ERROR2(["返回错误: 字典为空"])
+    TASK["创建扫描任务<br/>生成 task_id<br/>初始化统计数据"]
+    POOL["启动线程池<br/>ThreadPoolExecutor<br/>max_workers = 线程数"]
+    SUBMIT["提交所有路径到线程池<br/>每条路径调用 check_path()"]
+    REQUEST["requests.get() 发送HTTP请求<br/>timeout = 用户设定值<br/>allow_redirects=False"]
+    RESP{"响应状态码?"}
+    NOT_FOUND["未发现(not_found) + 1<br/>跳过"]
+    ERR["错误数(errors) + 1<br/>跳过"]
+    RISK["check_risk() 风险分类<br/>判定 风险类型 + 风险等级"]
+    RESULT["构建 ScanResult 对象<br/>加入结果列表"]
+    NEXT{"还有未完成路径?"}
+    SORT["按风险等级排序<br/>高 → 中 → 低"]
+    REPORT["save_html_report()<br/>生成 HTML 报告文件"]
+    DONE(["扫描完成<br/>返回结果 JSON"])
+
+    START --> INPUT
+    INPUT --> VALIDATE
+    VALIDATE -->|否| ERROR1
+    VALIDATE -->|是| FIX
+    FIX --> READ
+    READ --> CHECK
+    CHECK -->|是| ERROR2
+    CHECK -->|否| TASK
+    TASK --> POOL
+    POOL --> SUBMIT
+    SUBMIT --> REQUEST
+    REQUEST --> RESP
+    RESP -->|404| NOT_FOUND
+    RESP -->|异常| ERR
+    RESP -->|2xx/3xx/4xx/5xx| RISK
+    RISK --> RESULT
+    NOT_FOUND --> NEXT
+    ERR --> NEXT
+    RESULT --> NEXT
+    NEXT -->|是| REQUEST
+    NEXT -->|否| SORT
+    SORT --> REPORT
+    REPORT --> DONE
+
+    style START fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#1a1a1a
+    style DONE fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#1a1a1a
+    style ERROR1 fill:#e8e8e8,stroke:#888,stroke-width:1.5px,color:#333
+    style ERROR2 fill:#e8e8e8,stroke:#888,stroke-width:1.5px,color:#333
+    style INPUT fill:#fafafa,stroke:#666,stroke-width:1.5px,color:#333
+    style READ fill:#fafafa,stroke:#666,stroke-width:1.5px,color:#333
+    style VALIDATE fill:#fff,stroke:#444,stroke-width:2px,color:#1a1a1a
+    style CHECK fill:#fff,stroke:#444,stroke-width:2px,color:#1a1a1a
+    style RESP fill:#fff,stroke:#444,stroke-width:2px,color:#1a1a1a
+    style NEXT fill:#fff,stroke:#444,stroke-width:2px,color:#1a1a1a
+    style FIX fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style TASK fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style POOL fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style SUBMIT fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style REQUEST fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style NOT_FOUND fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style ERR fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style RISK fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style RESULT fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style SORT fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+    style REPORT fill:#f5f5f5,stroke:#555,stroke-width:1.5px,color:#1a1a1a
+  </div>
+</div>
+
+<div style="margin-top:16px;width:100%;max-width:800px;display:flex;gap:20px;font-size:12px;color:#555;justify-content:center;flex-wrap:wrap;">
+  <span><span style="display:inline-block;width:24px;height:14px;border:1.5px solid #333;border-radius:10px;vertical-align:middle;margin-right:4px;"></span> 圆角矩形 — 开始 / 结束</span>
+  <span><span style="display:inline-block;width:24px;height:14px;border:1.5px solid #666;background:#fafafa;vertical-align:middle;margin-right:4px;"></span> 平行四边形 — 输入 / 输出数据</span>
+  <span><span style="display:inline-block;width:24px;height:14px;border:1.5px solid #555;vertical-align:middle;margin-right:4px;"></span> 矩形 — 处理步骤</span>
+  <span><span style="display:inline-block;width:14px;height:14px;border:1.5px solid #444;transform:rotate(45deg);vertical-align:middle;margin-right:4px;"></span> 菱形 — 判断 / 分支</span>
+</div>
+
+<table class="step-table">
+  <thead>
+    <tr><th>步骤</th><th>对应代码</th><th>说明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><span class="step-num">1</span></td><td>webapp.py → api_scan()</td><td>接收前端 POST 请求，解析参数</td></tr>
+    <tr><td><span class="step-num">2</span></td><td>scanner.py → fix_url()</td><td>补全 http:// 协议前缀和尾部斜杠</td></tr>
+    <tr><td><span class="step-num">3</span></td><td>wordlist.py → read_wordlist()</td><td>读取字典文件，展开 %EXT% 占位符，生成扩展名变体</td></tr>
+    <tr><td><span class="step-num">4</span></td><td>webapp.py → run_scan()</td><td>创建线程池，并发执行 check_path()</td></tr>
+    <tr><td><span class="step-num">5</span></td><td>scanner.py → check_path()</td><td>发送 HTTP GET 请求，判断状态码</td></tr>
+    <tr><td><span class="step-num">6</span></td><td>classifier.py → check_risk()</td><td>根据路径特征判定风险类型和等级</td></tr>
+    <tr><td><span class="step-num">7</span></td><td>report.py → save_html_report()</td><td>生成独立 HTML 报告文件</td></tr>
+  </tbody>
+</table>
+
+<div class="footer">ListScanner 毕业设计项目 — 扫描执行流程图</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#f5f5f5',
+    primaryTextColor: '#1a1a1a',
+    primaryBorderColor: '#555',
+    lineColor: '#555',
+    secondaryColor: '#f0f0f0',
+    tertiaryColor: '#f8f8f8',
+    fontFamily: '"Microsoft YaHei", Arial, sans-serif',
+    fontSize: '13px'
+  }
+});
+
+// === 连线控制面板 ===
+function togglePanel() {
+  document.getElementById('linePanel').classList.toggle('show');
+}
+
+function applyLineStyle() {
+  const style = document.querySelector('input[name="lineStyle"]:checked').value;
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const edges = svg.querySelectorAll('.edgePath path, .edgePaths path');
+  edges.forEach(p => {
+    p.removeAttribute('stroke-dasharray');
+    if (style === 'dashed') {
+      p.setAttribute('stroke-dasharray', '6,4');
+    }
+    if (style === 'straight') {
+      p.setAttribute('data-curve', 'linear');
+    } else {
+      p.removeAttribute('data-curve');
+    }
+  });
+}
+
+function applyLineWidth(val) {
+  document.getElementById('widthVal').textContent = val;
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  svg.querySelectorAll('.edgePath path, .edgePaths path').forEach(p => {
+    p.setAttribute('stroke-width', val);
+  });
+}
+
+function applyArrowSize(val) {
+  document.getElementById('arrowVal').textContent = val;
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  svg.querySelectorAll('marker path, marker polygon').forEach(m => {
+    m.setAttribute('stroke-width', val / 4);
+  });
+  svg.querySelectorAll('.edgePath path').forEach(p => {
+    p.setAttribute('stroke-width', document.getElementById('strokeWidth').value);
+  });
+}
+
+// === 菱形箭头修正 ===
+function fixDiamondArrows() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+
+  // 找到所有菱形节点（polygon，4个点）
+  const diamonds = [];
+  svg.querySelectorAll('.node polygon, .nodes polygon').forEach(poly => {
+    const pts = poly.getAttribute('points');
+    if (!pts) return;
+    const coords = pts.trim().split(/\s+/).map(p => {
+      const [x, y] = p.split(',').map(Number);
+      return { x, y };
+    });
+    if (coords.length === 4) {
+      const g = poly.closest('g');
+      const transform = g ? g.getAttribute('transform') : '';
+      let tx = 0, ty = 0;
+      if (transform) {
+        const m = transform.match(/translate\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/);
+        if (m) { tx = parseFloat(m[1]); ty = parseFloat(m[2]); }
+      }
+      diamonds.push({
+        corners: coords.map(c => ({ x: c.x + tx, y: c.y + ty })),
+        el: poly
+      });
+    }
+  });
+
+  if (diamonds.length === 0) return;
+
+  // 找到所有连线路径
+  const edgePaths = svg.querySelectorAll('.edgePath path, .edgePaths path');
+  let fixed = 0;
+
+  edgePaths.forEach(path => {
+    const d = path.getAttribute('d');
+    if (!d) return;
+
+    // 解析路径的第一个坐标点
+    const firstMove = d.match(/M\s*([-\d.]+)\s+([-\d.]+)/);
+    if (!firstMove) return;
+    const startX = parseFloat(firstMove[1]);
+    const startY = parseFloat(firstMove[2]);
+
+    // 检查起点是否靠近某个菱形
+    for (const diamond of diamonds) {
+      const nearestCorner = findNearestCorner(startX, startY, diamond.corners);
+      if (nearestCorner.dist < 30) {
+        // 将路径起点移动到菱形角上
+        const newD = d.replace(
+          /M\s*([-\d.]+)\s+([-\d.]+)/,
+          `M ${nearestCorner.x.toFixed(1)} ${nearestCorner.y.toFixed(1)}`
+        );
+        path.setAttribute('d', newD);
+        fixed++;
+        break;
+      }
+    }
+  });
+
+  if (fixed > 0) {
+    const btn = document.querySelector('.line-panel button:last-child');
+    if (btn) { btn.textContent = `已修正 ${fixed} 条`; setTimeout(() => btn.textContent = '修正菱形箭头', 2000); }
+  }
+}
+
+function findNearestCorner(x, y, corners) {
+  let minDist = Infinity;
+  let nearest = corners[0];
+  corners.forEach(c => {
+    const dist = Math.sqrt((c.x - x) ** 2 + (c.y - y) ** 2);
+    if (dist < minDist) { minDist = dist; nearest = c; }
+  });
+  return { x: nearest.x, y: nearest.y, dist: minDist };
+}
+
+// 渲染后自动修正
+setTimeout(fixDiamondArrows, 500);
+
+function copyDiagram() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const svgData = new XMLSerializer().serializeToString(svg);
+  navigator.clipboard.writeText(svgData).then(() => alert('SVG 已复制到剪贴板'));
+}
+</script>
+</body>
+</html>

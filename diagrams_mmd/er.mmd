@@ -1,0 +1,76 @@
+erDiagram
+    SYSTEM_CONFIG ||--o{ DICTIONARY : "指定"
+    DICTIONARY ||--o{ CANDIDATE_PATH : "生成"
+    SCAN_TASK ||--o{ CANDIDATE_PATH : "包含"
+    SCAN_TASK ||--o{ SCAN_RESULT : "产出"
+    SCAN_TASK ||--|| SCAN_STATS : "汇总"
+    SCAN_RESULT }o--|| RISK_CLASSIFICATION : "归类"
+    SCAN_RESULT ||--|| HTML_REPORT : "写入"
+    SCAN_STATS ||--|| HTML_REPORT : "写入"
+
+    SYSTEM_CONFIG {
+        int config_id PK "配置编号"
+        string threads "线程数"
+        float timeout "请求超时"
+        string extensions "扩展名列表"
+        string default_wordlist "默认字典"
+    }
+
+    DICTIONARY {
+        int dict_id PK "字典编号"
+        int config_id FK "所属配置"
+        string file_name "文件名"
+        string file_path "文件路径"
+        int entry_count "词条数量"
+    }
+
+    CANDIDATE_PATH {
+        int path_id PK "路径编号"
+        int task_id FK "所属任务"
+        string path "路径字符串"
+        string source_dict "来源字典"
+        string extension "扩展名"
+    }
+
+    SCAN_TASK {
+        int task_id PK "任务编号"
+        string target_url "目标地址"
+        int total_paths "总路径数"
+        string status "任务状态"
+        datetime created_at "创建时间"
+    }
+
+    SCAN_RESULT {
+        int result_id PK "结果编号"
+        int task_id FK "所属任务"
+        string path "路径"
+        string url "完整URL"
+        int status_code "HTTP状态码"
+        int size "响应大小"
+        string content_type "内容类型"
+        int risk_id FK "风险分类"
+    }
+
+    RISK_CLASSIFICATION {
+        int risk_id PK "分类编号"
+        string risk_type "风险类型"
+        string risk_level "风险等级"
+        string description "描述"
+    }
+
+    SCAN_STATS {
+        int stats_id PK "统计编号"
+        int task_id FK "所属任务"
+        int total "总请求数"
+        int found "发现数"
+        int not_found "未发现数"
+        int errors "错误数"
+    }
+
+    HTML_REPORT {
+        int report_id PK "报告编号"
+        int task_id FK "所属任务"
+        string file_name "报告文件名"
+        string file_path "文件路径"
+        datetime generated_at "生成时间"
+    }

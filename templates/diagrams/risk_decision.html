@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>check_risk() 风险分类决策树 - ListScanner</title>
+<style>
+  @page { size: A4 landscape; margin: 15mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    background: #fff; color: #1a1a2e;
+    padding: 40px; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .page-header {
+    text-align: center; margin-bottom: 32px; width: 100%; max-width: 1200px;
+  }
+  .page-header h1 {
+    font-size: 22px; font-weight: 700; color: #1a1a2e;
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .page-header .subtitle {
+    font-size: 13px; color: #666;
+  }
+  .diagram-wrap {
+    background: #fff; border: 1.5px solid #d1d5db;
+    border-radius: 8px; padding: 32px; width: 100%; max-width: 1200px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    overflow-x: auto;
+  }
+  .diagram-wrap .mermaid { text-align: center; }
+  .legend {
+    margin-top: 24px; width: 100%; max-width: 1200px;
+    display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #374151;
+  }
+  .legend-dot {
+    width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid;
+  }
+  .legend-dot.high { background: #e0e0e0; border-color: #888; }
+  .legend-dot.med { background: #e8e8e8; border-color: #777; }
+  .legend-dot.low { background: #f0f0f0; border-color: #555; }
+  .toolbar {
+    position: fixed; top: 16px; right: 16px;
+    display: flex; gap: 8px; z-index: 100;
+  }
+  .toolbar button {
+    padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 6px;
+    background: #fff; color: #374151; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .toolbar button:hover { background: #f3f4f6; border-color: #9ca3af; }
+  .toolbar button.primary { background: #333; color: #fff; border-color: #333; }
+  .toolbar button.primary:hover { background: #222; }
+  .footer {
+    margin-top: 24px; font-size: 11px; color: #9ca3af; text-align: center;
+  }
+  @media print {
+    body { padding: 0; }
+    .toolbar { display: none; }
+    .diagram-wrap { border: 1px solid #ccc; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button onclick="window.print()">打印 / 导出PDF</button>
+  <button class="primary" onclick="copyDiagram()">复制图表</button>
+</div>
+<div class="page-header">
+  <h1>check_risk() 风险分类决策树</h1>
+  <div class="subtitle">ListScanner - classifier.py 风险判定逻辑</div>
+</div>
+<div class="diagram-wrap">
+  <div class="mermaid">
+flowchart LR
+    INPUT["path 输入"] --> G{"含 .git/.svn?"}
+    G -->|是| R1["源码泄露<br/>高风险"]
+    G -->|否| B{"含 backup/bak/old?"}
+    B -->|是| R2["备份文件<br/>高风险"]
+    B -->|否| C{"含 .env/.htaccess<br/>config?"}
+    C -->|是| R3["配置文件<br/>高风险"]
+    C -->|否| D{"扩展名 .zip<br/>.rar/.sql?"}
+    D -->|是| R4["压缩/数据库<br/>高风险"]
+    D -->|否| E{"含 admin?"}
+    E -->|是| R5["后台入口<br/>高风险"]
+    E -->|否| F{"含 manage?"}
+    F -->|是| R6["管理目录<br/>高风险"]
+    F -->|否| H{"含 login?"}
+    H -->|是| R7["登录入口<br/>中风险"]
+    H -->|否| I{"含 phpinfo/log?"}
+    I -->|是| R8["环境/日志<br/>中风险"]
+    I -->|否| J{"含 test?"}
+    J -->|是| R9["测试文件<br/>中风险"]
+    J -->|否| K{"以 / 结尾?"}
+    K -->|是| R10["普通目录<br/>低风险"]
+    K -->|否| R11["普通文件<br/>低风险"]
+
+    style R1 fill:#e0e0e0,stroke:#888,color:#333
+    style R2 fill:#e0e0e0,stroke:#888,color:#333
+    style R3 fill:#e0e0e0,stroke:#888,color:#333
+    style R4 fill:#e0e0e0,stroke:#888,color:#333
+    style R5 fill:#e0e0e0,stroke:#888,color:#333
+    style R6 fill:#e0e0e0,stroke:#888,color:#333
+    style R7 fill:#e8e8e8,stroke:#777,color:#444
+    style R8 fill:#e8e8e8,stroke:#777,color:#444
+    style R9 fill:#e8e8e8,stroke:#777,color:#444
+    style R10 fill:#f0f0f0,stroke:#555,color:#333
+    style R11 fill:#f0f0f0,stroke:#555,color:#333
+  </div>
+</div>
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot high"></div>高风险 - 可能导致敏感信息泄露或系统入侵</div>
+  <div class="legend-item"><div class="legend-dot med"></div>中风险 - 需要关注的安全问题</div>
+  <div class="legend-item"><div class="legend-dot low"></div>低风险 - 一般性信息</div>
+</div>
+<div class="footer">ListScanner 毕业设计项目 - 风险分类决策树</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#f5f5f5',
+    primaryTextColor: '#1a1a1a',
+    primaryBorderColor: '#555',
+    lineColor: '#555',
+    secondaryColor: '#f0f0f0',
+    tertiaryColor: '#f8f8f8',
+    fontFamily: '"Microsoft YaHei", Arial, sans-serif',
+    fontSize: '13px'
+  }
+});
+function copyDiagram() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const svgData = new XMLSerializer().serializeToString(svg);
+  navigator.clipboard.writeText(svgData).then(() => alert('SVG 已复制到剪贴板'));
+}
+</script>
+</body>
+</html>

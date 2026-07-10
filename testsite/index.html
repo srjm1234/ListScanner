@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>简易Web靶场</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-card: #111827;
+      --bg-card-hover: #1a2332;
+      --border: #1e293b;
+      --border-glow: #00d4ff;
+      --text: #e2e8f0;
+      --text-dim: #64748b;
+      --cyan: #00d4ff;
+      --green: #00ff88;
+      --red: #ff4757;
+      --orange: #ffa502;
+      --blue: #3b82f6;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background Grid */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    /* Scan Line */
+    body::after {
+      content: '';
+      position: fixed; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      box-shadow: 0 0 20px var(--cyan), 0 0 60px rgba(0,212,255,0.2);
+      animation: scanLine 4s linear infinite;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.5;
+    }
+    @keyframes scanLine {
+      0% { top: -2px; }
+      100% { top: 100%; }
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+      padding: 50px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(0,212,255,0.15);
+    }
+    .header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .header::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--green), var(--cyan), transparent);
+      animation: headerGlow 3s linear infinite;
+    }
+    @keyframes headerGlow {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+
+    /* Radar Icon */
+    .header-radar {
+      width: 60px; height: 60px;
+      margin: 0 auto 16px;
+      position: relative;
+    }
+    .header-radar svg {
+      width: 100%; height: 100%;
+      filter: drop-shadow(0 0 10px rgba(0,212,255,0.5));
+    }
+    .radar-pulse {
+      position: absolute; inset: -10px;
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 50%;
+      animation: radarPulse 2s ease-out infinite;
+    }
+    @keyframes radarPulse {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    .header h1 {
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px rgba(0,212,255,0.3);
+    }
+    .header h1 span {
+      color: var(--cyan);
+      text-shadow: 0 0 15px rgba(0,212,255,0.5);
+    }
+    .header p {
+      color: var(--text-dim);
+      font-size: 14px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    /* Container */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 30px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Warning - HUD */
+    .warn {
+      background: rgba(255,165,0,0.08);
+      border: none;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--orange);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      animation: fadeInUp 0.5s 0.2s ease forwards;
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+      position: relative;
+    }
+    .warn::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+      border: 1px solid rgba(255,165,0,0.2);
+      pointer-events: none;
+    }
+    .warn svg { flex-shrink: 0; }
+
+    /* Sections - HUD Cyber Border */
+    .section {
+      background: var(--bg-card);
+      border: none;
+      margin-bottom: 20px;
+      overflow: visible;
+      position: relative;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+    }
+    .section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .section::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+      border: 1.5px solid rgba(0,212,255,0.15);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .section::after {
+      content: '';
+      position: absolute; top: 0; left: 8%; right: 8%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,212,255,0.3), rgba(0,255,136,0.2), rgba(0,212,255,0.3), transparent);
+      z-index: 5;
+    }
+    .section:hover {
+      box-shadow: 0 4px 30px rgba(0,0,0,0.3), 0 0 20px rgba(0,212,255,0.05);
+      transform: translateY(-2px);
+    }
+    .section:hover::before {
+      border-color: rgba(0,212,255,0.35);
+      box-shadow: inset 0 0 20px rgba(0,212,255,0.05);
+    }
+
+    .section-title {
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 22px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .section-title .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      position: relative;
+    }
+    .dot::after {
+      content: '';
+      position: absolute; inset: -3px;
+      border-radius: 50%;
+      border: 1px solid currentColor;
+      opacity: 0.3;
+      animation: dotPulse 2s ease infinite;
+    }
+    @keyframes dotPulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.5); opacity: 0; }
+    }
+    .dot-red { background: var(--red); color: var(--red); box-shadow: 0 0 8px var(--red); }
+    .dot-orange { background: var(--orange); color: var(--orange); box-shadow: 0 0 8px var(--orange); }
+    .dot-blue { background: var(--blue); color: var(--blue); box-shadow: 0 0 8px var(--blue); }
+    .dot-green { background: var(--green); color: var(--green); box-shadow: 0 0 8px var(--green); }
+
+    /* File Grid */
+    .file-grid {
+      padding: 18px 22px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 12px;
+    }
+    .file-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+      font-size: 13px;
+      position: relative;
+      overflow: hidden;
+      background: rgba(255,255,255,0.01);
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+    }
+    .file-link::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,212,255,0.05), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .file-link:hover {
+      border-color: rgba(0,212,255,0.3);
+      background: var(--bg-card-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3), 0 0 15px rgba(0,212,255,0.08);
+    }
+    .file-link:hover::before { opacity: 1; }
+
+    .file-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .icon-php { background: rgba(123,104,238,0.15); color: #7b68ee; border: 1px solid rgba(123,104,238,0.2); }
+    .icon-sql { background: rgba(230,126,34,0.15); color: #e67e22; border: 1px solid rgba(230,126,34,0.2); }
+    .icon-config { background: rgba(39,174,96,0.15); color: #27ae60; border: 1px solid rgba(39,174,96,0.2); }
+    .icon-bak { background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.2); }
+    .icon-html { background: rgba(33,150,243,0.15); color: #2196f3; border: 1px solid rgba(33,150,243,0.2); }
+    .icon-txt { background: rgba(102,102,102,0.15); color: #999; border: 1px solid rgba(102,102,102,0.2); }
+
+    .file-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+    .file-name {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .file-desc {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 3px;
+    }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.5px;
+    }
+    .tag-high {
+      background: rgba(255,71,87,0.15);
+      color: var(--red);
+      border: 1px solid rgba(255,71,87,0.2);
+    }
+    .tag-med {
+      background: rgba(255,165,0,0.15);
+      color: var(--orange);
+      border: 1px solid rgba(255,165,0,0.2);
+    }
+    .tag-low {
+      background: rgba(0,255,136,0.1);
+      color: var(--green);
+      border: 1px solid rgba(0,255,136,0.2);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 30px 20px;
+      font-size: 12px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px;
+      position: relative;
+      z-index: 1;
+    }
+    .footer::before {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      margin: 0 auto 16px;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Glitch effect on hover for high-risk items */
+    .file-link[href*=".bak"]:hover .file-name,
+    .file-link[href*="backup"]:hover .file-name,
+    .file-link[href*="config.php"]:hover .file-name {
+      animation: textGlitch 0.3s ease;
+    }
+    @keyframes textGlitch {
+      0%, 100% { text-shadow: none; }
+      25% { text-shadow: -2px 0 var(--red), 2px 0 var(--cyan); }
+      50% { text-shadow: 2px 0 var(--red), -2px 0 var(--cyan); }
+      75% { text-shadow: -1px 0 var(--red), 1px 0 var(--cyan); }
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeInUp 0.5s 0.1s ease forwards;
+    }
+    .stat-item {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.02);
+      clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+      position: relative;
+    }
+    .stat-item::before {
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+      border: 1px solid var(--border);
+      pointer-events: none;
+    }
+    .stat-item strong {
+      color: var(--cyan);
+      margin-right: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .file-grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-radar">
+      <div class="radar-pulse"></div>
+      <svg viewBox="0 0 60 60" fill="none">
+        <circle cx="30" cy="30" r="24" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+        <circle cx="30" cy="30" r="15" stroke="rgba(0,212,255,0.5)" stroke-width="1"/>
+        <circle cx="30" cy="30" r="6" stroke="rgba(0,212,255,0.7)" stroke-width="1.5"/>
+        <circle cx="30" cy="30" r="2" fill="#00d4ff"/>
+        <line x1="30" y1="30" x2="50" y2="18" stroke="#00d4ff" stroke-width="2" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="2.5s" repeatCount="indefinite"/>
+        </line>
+        <circle cx="44" cy="20" r="2" fill="#00ff88" opacity="0.8">
+          <animate attributeName="opacity" values="0.8;0.1;0.8" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+    <h1>简易 Web <span>靶场</span></h1>
+    <p>用于安全扫描测试 · 包含常见敏感文件和目录</p>
+  </div>
+
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat-item"><strong>5</strong> 高风险</div>
+      <div class="stat-item"><strong>4</strong> 中风险</div>
+      <div class="stat-item"><strong>6</strong> 目录入口</div>
+      <div class="stat-item"><strong>3</strong> 普通页面</div>
+      <div class="stat-item"><strong>18+</strong> 植入路径</div>
+    </div>
+
+    <div class="warn">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      仅供安全测试和学习使用，请勿用于非法用途
+    </div>
+
+    <!-- 高风险文件 -->
+    <div class="section" data-section>
+      <div class="section-title"><span class="dot dot-red"></span>高风险 - 敏感文件</div>
+      <div class="file-grid">
+        <a class="file-link" href="/config.php.bak">
+          <div class="file-icon icon-bak">bak</div>
+          <div class="file-info">
+            <div class="file-name">config.php.bak</div>
+            <div class="file-desc">配置文件备份 <span class="tag tag-high">高风险</span></div>
+          </div>
+        </a>
+        <a class="file-link" href="/backup.sql">
+          <div class="file-icon icon-sql">sql</div>
+          <div class="file-info">
+            <div class="file-name">backup.sql</div>
+            <div class="file-desc">数据库备份 <span class="tag tag-high">高风险</span></div>
+          </div>
+        </a>
+        <a class="file-link" href="/backup.zip">
+          <div class="file-icon icon-bak">zip</div>
+          <div class="file-info">
+            <div class="file-name">backup.zip</div>
+            <div class="file-desc">压缩包备份 <span class="tag tag-high">高风险</span></div>
+          </div>
+        </a>
+        <a class="file-link" href="/web.config">
+          <div class="file-icon icon-config">cfg</div>
+          <div class="file-info">
+            <div class="file-name">web.config</div>
+            <div class="file-desc">Web服务器配置 <span class="tag tag-high">高风险</span></div>
+          </div>
+        </a>
+        <a class="file-link" href="/config.php">
+          <div class="file-icon icon-php">php</div>
+          <div class="file-info">
+            <div class="file-name">config.php</div>
+            <div class="file-desc">应用配置文件 <span class="tag tag-high">高风险</span></div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 中风险文件 -->
+    <div class="section" data-section>
+      <div class="section-title"><span class="dot dot-orange"></span>中风险 - 信息泄露</div>
+      <div class="file-grid">
+        <a class="file-link" href="/phpinfo.php">
+          <div class="file-icon icon-php">php</div>
+          <div class="file-info">
+            <div class="file-name">phpinfo.php</div>
+            <div class="file-desc">环境信息泄露 <span class="tag tag-med">中风险</span></div>
+          </div>
+        </a>
+        <a class="file-link" href="/log.txt">
+          <div class="file-icon icon-txt">txt</div>
+          <div class="file-info">
+            <div class="file-name">log.txt</div>
+            <div class="file-desc">日志文件 <span class="tag tag-med">中风险</span></div>
+          </div>
+        </a>
+        <a class="file-link" href="/test.php">
+          <div class="file-icon icon-php">php</div>
+          <div class="file-info">
+            <div class="file-name">test.php</div>
+            <div class="file-desc">测试文件 <span class="tag tag-med">中风险</span></div>
+          </div>
+        </a>
+        <a class="file-link" href="/setup.php">
+          <div class="file-icon icon-php">php</div>
+          <div class="file-info">
+            <div class="file-name">setup.php</div>
+            <div class="file-desc">安装页面 <span class="tag tag-med">中风险</span></div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 目录与入口 -->
+    <div class="section" data-section>
+      <div class="section-title"><span class="dot dot-blue"></span>目录与入口</div>
+      <div class="file-grid">
+        <a class="file-link" href="/login.php">
+          <div class="file-icon icon-php">php</div>
+          <div class="file-info">
+            <div class="file-name">login.php</div>
+            <div class="file-desc">登录入口</div>
+          </div>
+        </a>
+        <a class="file-link" href="/admin/">
+          <div class="file-icon icon-html">dir</div>
+          <div class="file-info">
+            <div class="file-name">admin/</div>
+            <div class="file-desc">管理后台</div>
+          </div>
+        </a>
+        <a class="file-link" href="/manage/">
+          <div class="file-icon icon-html">dir</div>
+          <div class="file-info">
+            <div class="file-name">manage/</div>
+            <div class="file-desc">管理目录</div>
+          </div>
+        </a>
+        <a class="file-link" href="/upload/">
+          <div class="file-icon icon-html">dir</div>
+          <div class="file-info">
+            <div class="file-name">upload/</div>
+            <div class="file-desc">上传目录</div>
+          </div>
+        </a>
+        <a class="file-link" href="/hackable/">
+          <div class="file-icon icon-html">dir</div>
+          <div class="file-info">
+            <div class="file-name">hackable/</div>
+            <div class="file-desc">可利用目录</div>
+          </div>
+        </a>
+        <a class="file-link" href="/vulnerabilities/">
+          <div class="file-icon icon-html">dir</div>
+          <div class="file-info">
+            <div class="file-name">vulnerabilities/</div>
+            <div class="file-desc">漏洞目录</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 普通页面 -->
+    <div class="section" data-section>
+      <div class="section-title"><span class="dot dot-green"></span>普通页面</div>
+      <div class="file-grid">
+        <a class="file-link" href="/instructions.php">
+          <div class="file-icon icon-php">php</div>
+          <div class="file-info">
+            <div class="file-name">instructions.php</div>
+            <div class="file-desc">说明页面</div>
+          </div>
+        </a>
+        <a class="file-link" href="/security.php">
+          <div class="file-icon icon-php">php</div>
+          <div class="file-info">
+            <div class="file-name">security.php</div>
+            <div class="file-desc">安全设置</div>
+          </div>
+        </a>
+        <a class="file-link" href="/logout.php">
+          <div class="file-icon icon-php">php</div>
+          <div class="file-info">
+            <div class="file-name">logout.php</div>
+            <div class="file-desc">退出登录</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">简易Web靶场 · 仅供安全测试学习使用</div>
+
+  <script>
+    // Stagger reveal sections
+    document.addEventListener('DOMContentLoaded', function() {
+      var sections = document.querySelectorAll('[data-section]');
+      sections.forEach(function(sec, i) {
+        setTimeout(function() {
+          sec.classList.add('visible');
+        }, 300 + i * 150);
+      });
+
+      // File link hover sound effect (visual only - cursor glow)
+      document.querySelectorAll('.file-link').forEach(function(link) {
+        link.addEventListener('mouseenter', function() {
+          this.style.transition = 'all 0.25s cubic-bezier(0.23, 1, 0.32, 1)';
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.spec
+
+# 构建 / 打包产物
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# 虚拟环境
+venv/
+.venv/
+env/
+ENV/
+
+# ===== 打包后的二进制（通过 GitHub Releases 发布，不入仓库）=====
+exe/ListScanner.exe
+exe/dictionary/
+
+# ===== 生成的扫描报告 / 临时文件 =====
+report.html
+report0.html
+scan_report_*.csv
+scan_report_*.json
+scan_report_*.html
+_tmp_*.txt
+dictionary/report.html
+
+# ===== 本地配置 =====
+config.ini
+
+# ===== 编辑器 / 操作系统 =====
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 工作区元数据 =====
+.workbuddy/

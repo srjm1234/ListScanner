@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模块依赖关系图 - ListScanner</title>
+<style>
+  @page { size: A4 portrait; margin: 15mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    background: #fff; color: #1a1a1a;
+    padding: 40px; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .page-header {
+    text-align: center; margin-bottom: 28px; width: 100%; max-width: 860px;
+  }
+  .page-header h1 {
+    font-size: 22px; font-weight: 700; color: #1a1a1a;
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .page-header .subtitle {
+    font-size: 13px; color: #666;
+  }
+  .diagram-wrap {
+    background: #fff; border: 1.5px solid #999;
+    border-radius: 6px; padding: 28px; width: 100%; max-width: 860px;
+  }
+  .diagram-wrap .mermaid { text-align: center; }
+  .file-table {
+    margin-top: 24px; width: 100%; max-width: 860px;
+    border-collapse: collapse; font-size: 13px;
+  }
+  .file-table th, .file-table td {
+    border: 1px solid #bbb; padding: 8px 12px; text-align: left;
+  }
+  .file-table th {
+    background: #e8e8e8; color: #222; font-weight: 600;
+  }
+  .file-table td { color: #333; }
+  .file-table tr:nth-child(even) td { background: #f7f7f7; }
+  .file-table code {
+    font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", monospace;
+    font-size: 12px; background: #f0f0f0; padding: 1px 5px; border-radius: 3px;
+  }
+  .toolbar {
+    position: fixed; top: 16px; right: 16px;
+    display: flex; gap: 8px; z-index: 100;
+  }
+  .toolbar button {
+    padding: 8px 16px; border: 1px solid #999; border-radius: 4px;
+    background: #fff; color: #333; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .toolbar button:hover { background: #eee; }
+  .toolbar button.primary { background: #333; color: #fff; border-color: #333; }
+  .toolbar button.primary:hover { background: #111; }
+  .footer {
+    margin-top: 20px; font-size: 11px; color: #999; text-align: center;
+  }
+  @media print {
+    body { padding: 0; }
+    .toolbar { display: none; }
+    .diagram-wrap { border: 1px solid #ccc; box-shadow: none; }
+    .file-table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button onclick="window.print()">打印 / 导出PDF</button>
+  <button class="primary" onclick="copyDiagram()">复制图表</button>
+</div>
+<div class="page-header">
+  <h1>模块依赖关系图</h1>
+  <div class="subtitle">ListScanner — 各模块间的 import 调用关系</div>
+</div>
+<div class="diagram-wrap">
+  <div class="mermaid">
+graph TD
+    WEBAPP["webapp.py<br/>Flask Web 应用"]
+    CLI["cli.py<br/>命令行入口"]
+    SCANNER["scanner.py<br/>WebScanner"]
+    CLASSIFIER["classifier.py<br/>check_risk()"]
+    WORDLIST["wordlist.py<br/>read_wordlist()"]
+    MODELS["models.py<br/>ScanResult / ScanStats"]
+    CONFIG["config.py<br/>load_settings()"]
+    REPORT["report.py<br/>save_html_report()"]
+    INDEX["index.html<br/>前端页面"]
+
+    WEBAPP --> SCANNER
+    WEBAPP --> CLASSIFIER
+    WEBAPP --> WORDLIST
+    WEBAPP --> MODELS
+    WEBAPP --> CONFIG
+    WEBAPP --> REPORT
+    WEBAPP -.->|渲染| INDEX
+
+    CLI --> SCANNER
+    CLI --> CONFIG
+    CLI --> REPORT
+
+    SCANNER --> CLASSIFIER
+    SCANNER --> MODELS
+    SCANNER -.->|"requests.get()"| EXT["外部: requests 库"]
+
+    REPORT --> MODELS
+
+    style WEBAPP fill:#e8e8e8,stroke:#333,stroke-width:2px
+    style CLI fill:#e8e8e8,stroke:#333,stroke-width:2px
+    style SCANNER fill:#f0f0f0,stroke:#555,stroke-width:1.5px
+    style CLASSIFIER fill:#f0f0f0,stroke:#555,stroke-width:1.5px
+    style WORDLIST fill:#f0f0f0,stroke:#555,stroke-width:1.5px
+    style MODELS fill:#f5f5f5,stroke:#777,stroke-width:1px
+    style CONFIG fill:#f5f5f5,stroke:#777,stroke-width:1px
+    style REPORT fill:#f0f0f0,stroke:#555,stroke-width:1.5px
+    style INDEX fill:#fafafa,stroke:#aaa,stroke-width:1px,stroke-dasharray:5 5
+    style EXT fill:#fff,stroke:#aaa,stroke-width:1px,stroke-dasharray:5 5
+  </div>
+</div>
+
+<table class="file-table">
+  <thead>
+    <tr><th>模块文件</th><th>职责</th><th>被引用方</th><th>依赖方</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>webapp.py</code></td><td>Flask Web 应用，REST API 路由，扫描任务管理</td><td>—</td><td>scanner, classifier, wordlist, models, config, report</td></tr>
+    <tr><td><code>cli.py</code></td><td>命令行入口，argparse 参数解析</td><td>—</td><td>scanner, config, report</td></tr>
+    <tr><td><code>scanner.py</code></td><td>核心扫描器，多线程 HTTP 请求</td><td>webapp, cli</td><td>classifier, models</td></tr>
+    <tr><td><code>classifier.py</code></td><td>风险分类，路径特征匹配</td><td>webapp, scanner</td><td>—</td></tr>
+    <tr><td><code>wordlist.py</code></td><td>字典读取，%EXT% 展开，扩展名变体生成</td><td>webapp</td><td>—</td></tr>
+    <tr><td><code>models.py</code></td><td>数据模型定义 (dataclass)</td><td>webapp, scanner, report</td><td>—</td></tr>
+    <tr><td><code>config.py</code></td><td>配置文件读取 (configparser)</td><td>webapp, cli</td><td>—</td></tr>
+    <tr><td><code>report.py</code></td><td>HTML 报告生成</td><td>webapp, cli</td><td>models</td></tr>
+  </tbody>
+</table>
+
+<div class="footer">ListScanner 毕业设计项目 — 模块依赖关系图</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#f5f5f5',
+    primaryTextColor: '#1a1a1a',
+    primaryBorderColor: '#555',
+    lineColor: '#555',
+    secondaryColor: '#f0f0f0',
+    tertiaryColor: '#f8f8f8',
+    fontFamily: '"Microsoft YaHei", Arial, sans-serif',
+    fontSize: '13px'
+  },
+  flowchart: {
+    curve: 'linear',
+    padding: 15,
+    nodeSpacing: 40,
+    rankSpacing: 50,
+    htmlLabels: true
+  }
+});
+function copyDiagram() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const svgData = new XMLSerializer().serializeToString(svg);
+  navigator.clipboard.writeText(svgData).then(() => alert('SVG 已复制到剪贴板'));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+graph TD
+    WEBAPP["webapp.py<br/>Flask Web 应用"]
+    CLI["cli.py<br/>命令行入口"]
+    SCANNER["scanner.py<br/>WebScanner"]
+    CLASSIFIER["classifier.py<br/>check_risk()"]
+    WORDLIST["wordlist.py<br/>read_wordlist()"]
+    MODELS["models.py<br/>ScanResult / ScanStats"]
+    CONFIG["config.py<br/>load_settings()"]
+    REPORT["report.py<br/>save_html_report()"]
+    INDEX["index.html<br/>前端页面"]
+
+    WEBAPP --> SCANNER
+    WEBAPP --> CLASSIFIER
+    WEBAPP --> WORDLIST
+    WEBAPP --> MODELS
+    WEBAPP --> CONFIG
+    WEBAPP --> REPORT
+    WEBAPP -.->|渲染| INDEX
+
+    CLI --> SCANNER
+    CLI --> CONFIG
+    CLI --> REPORT
+
+    SCANNER --> CLASSIFIER
+    SCANNER --> MODELS
+    SCANNER -.->|"requests.get()"| EXT["外部: requests 库"]
+
+    REPORT --> MODELS
+
+    style WEBAPP fill:#e8e8e8,stroke:#333,stroke-width:2px
+    style CLI fill:#e8e8e8,stroke:#333,stroke-width:2px
+    style SCANNER fill:#f0f0f0,stroke:#555,stroke-width:1.5px
+    style CLASSIFIER fill:#f0f0f0,stroke:#555,stroke-width:1.5px
+    style WORDLIST fill:#f0f0f0,stroke:#555,stroke-width:1.5px
+    style MODELS fill:#f5f5f5,stroke:#777,stroke-width:1px
+    style CONFIG fill:#f5f5f5,stroke:#777,stroke-width:1px
+    style REPORT fill:#f0f0f0,stroke:#555,stroke-width:1.5px
+    style INDEX fill:#fafafa,stroke:#aaa,stroke-width:1px,stroke-dasharray:5 5
+    style EXT fill:#fff,stroke:#aaa,stroke-width:1px,stroke-dasharray:5 5

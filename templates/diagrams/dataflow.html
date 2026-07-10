@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>扫描流程 / 数据流图 - ListScanner</title>
+<style>
+  @page { size: A4 portrait; margin: 15mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    background: #fff; color: #1a1a2e;
+    padding: 40px; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .page-header {
+    text-align: center; margin-bottom: 32px; width: 100%; max-width: 900px;
+  }
+  .page-header h1 {
+    font-size: 22px; font-weight: 700; color: #1a1a2e;
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .page-header .subtitle {
+    font-size: 13px; color: #666;
+  }
+  .diagram-wrap {
+    background: #fff; border: 1.5px solid #d1d5db;
+    border-radius: 8px; padding: 32px; width: 100%; max-width: 900px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .diagram-wrap .mermaid { text-align: center; }
+  .toolbar {
+    position: fixed; top: 16px; right: 16px;
+    display: flex; gap: 8px; z-index: 100;
+  }
+  .toolbar button {
+    padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 6px;
+    background: #fff; color: #374151; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .toolbar button:hover { background: #f3f4f6; border-color: #9ca3af; }
+  .toolbar button.primary { background: #333; color: #fff; border-color: #333; }
+  .toolbar button.primary:hover { background: #222; }
+  .footer {
+    margin-top: 24px; font-size: 11px; color: #9ca3af; text-align: center;
+  }
+  @media print {
+    body { padding: 0; }
+    .toolbar { display: none; }
+    .diagram-wrap { border: 1px solid #ccc; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button onclick="window.print()">打印 / 导出PDF</button>
+  <button class="primary" onclick="copyDiagram()">复制图表</button>
+</div>
+<div class="page-header">
+  <h1>扫描流程 / 数据流图</h1>
+  <div class="subtitle">ListScanner Web路径扫描工具 - Sequence Diagram</div>
+</div>
+<div class="diagram-wrap">
+  <div class="mermaid">
+sequenceDiagram
+    actor 用户
+    participant CLI as CLI/WebUI
+    participant CFG as config.py
+    participant WL as wordlist.py
+    participant SC as scanner.py
+    participant CL as classifier.py
+    participant NET as 目标网站
+    participant RPT as report.py
+
+    用户->>CLI: 输入参数 / 提交表单
+    CLI->>CFG: load_settings()
+    CFG-->>CLI: 返回默认配置
+    CLI->>WL: read_wordlist(file, exts)
+    WL-->>CLI: 返回路径列表 [paths]
+    CLI->>SC: WebScanner(url, paths, threads)
+    loop 每个路径 (多线程)
+        SC->>NET: HTTP GET /path
+        NET-->>SC: 响应（状态码, 响应体）
+        SC->>CL: check_risk(path)
+        CL-->>SC: (risk_type, risk_level)
+        SC->>SC: 构建 ScanResult
+    end
+    SC-->>CLI: 返回 results[]
+    CLI->>RPT: save_html_report(results)
+    RPT-->>用户: 生成 report.html
+  </div>
+</div>
+<div class="footer">ListScanner 毕业设计项目 - 扫描流程图</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#f5f5f5',
+    primaryTextColor: '#1a1a1a',
+    primaryBorderColor: '#555',
+    lineColor: '#555',
+    secondaryColor: '#f0f0f0',
+    tertiaryColor: '#f8f8f8',
+    noteBkgColor: '#f8f8f8',
+    noteTextColor: '#1a1a1a',
+    noteBorderColor: '#888',
+    actorTextColor: '#1a1a1a',
+    actorBkg: '#f5f5f5',
+    actorBorder: '#555',
+    fontFamily: '"Microsoft YaHei", Arial, sans-serif',
+    fontSize: '13px'
+  }
+});
+function copyDiagram() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const svgData = new XMLSerializer().serializeToString(svg);
+  navigator.clipboard.writeText(svgData).then(() => alert('SVG 已复制到剪贴板'));
+}
+</script>
+</body>
+</html>

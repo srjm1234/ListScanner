@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-R 数据模型图 - ListScanner</title>
+<style>
+  @page { size: A4 landscape; margin: 15mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    background: #fff; color: #1a1a1a;
+    padding: 40px; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .page-header {
+    text-align: center; margin-bottom: 28px; width: 100%; max-width: 1200px;
+  }
+  .page-header h1 {
+    font-size: 22px; font-weight: 700; color: #1a1a1a;
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .page-header .subtitle {
+    font-size: 13px; color: #666;
+  }
+  .diagram-wrap {
+    background: #fff; border: 1.5px solid #999;
+    border-radius: 6px; padding: 28px; width: 100%; max-width: 1200px;
+    overflow-x: auto;
+  }
+  .diagram-wrap .mermaid { text-align: center; }
+  .diagram-wrap .mermaid svg {
+    max-width: 100%;
+  }
+  .desc-table {
+    margin-top: 24px; width: 100%; max-width: 1200px;
+    border-collapse: collapse; font-size: 13px;
+  }
+  .desc-table th, .desc-table td {
+    border: 1px solid #bbb; padding: 8px 12px; text-align: left;
+  }
+  .desc-table th {
+    background: #e8e8e8; color: #222; font-weight: 600;
+  }
+  .desc-table td { color: #333; }
+  .desc-table tr:nth-child(even) td { background: #f7f7f7; }
+  .toolbar {
+    position: fixed; top: 16px; right: 16px;
+    display: flex; gap: 8px; z-index: 100;
+  }
+  .toolbar button {
+    padding: 8px 16px; border: 1px solid #999; border-radius: 4px;
+    background: #fff; color: #333; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .toolbar button:hover { background: #eee; }
+  .toolbar button.primary { background: #333; color: #fff; border-color: #333; }
+  .toolbar button.primary:hover { background: #111; }
+  .footer {
+    margin-top: 20px; font-size: 11px; color: #999; text-align: center;
+  }
+  @media print {
+    body { padding: 0; }
+    .toolbar { display: none; }
+    .diagram-wrap { border: 1px solid #ccc; box-shadow: none; }
+    .desc-table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button onclick="window.print()">打印 / 导出PDF</button>
+  <button class="primary" onclick="copyDiagram()">复制图表</button>
+</div>
+<div class="page-header">
+  <h1>系统实体关系图（E-R图）</h1>
+  <div class="subtitle">ListScanner Web路径扫描工具 — Entity-Relationship Diagram</div>
+</div>
+<div class="diagram-wrap">
+  <div class="mermaid">
+erDiagram
+    SYSTEM_CONFIG ||--o{ DICTIONARY : "指定"
+    DICTIONARY ||--o{ CANDIDATE_PATH : "生成"
+    SCAN_TASK ||--o{ CANDIDATE_PATH : "包含"
+    SCAN_TASK ||--o{ SCAN_RESULT : "产出"
+    SCAN_TASK ||--|| SCAN_STATS : "汇总"
+    SCAN_RESULT }o--|| RISK_CLASSIFICATION : "归类"
+    SCAN_RESULT ||--|| HTML_REPORT : "写入"
+    SCAN_STATS ||--|| HTML_REPORT : "写入"
+
+    SYSTEM_CONFIG {
+        int config_id PK "配置编号"
+        string threads "线程数"
+        float timeout "请求超时"
+        string extensions "扩展名列表"
+        string default_wordlist "默认字典"
+    }
+
+    DICTIONARY {
+        int dict_id PK "字典编号"
+        int config_id FK "所属配置"
+        string file_name "文件名"
+        string file_path "文件路径"
+        int entry_count "词条数量"
+    }
+
+    CANDIDATE_PATH {
+        int path_id PK "路径编号"
+        int task_id FK "所属任务"
+        string path "路径字符串"
+        string source_dict "来源字典"
+        string extension "扩展名"
+    }
+
+    SCAN_TASK {
+        int task_id PK "任务编号"
+        string target_url "目标地址"
+        int total_paths "总路径数"
+        string status "任务状态"
+        datetime created_at "创建时间"
+    }
+
+    SCAN_RESULT {
+        int result_id PK "结果编号"
+        int task_id FK "所属任务"
+        string path "路径"
+        string url "完整URL"
+        int status_code "HTTP状态码"
+        int size "响应大小"
+        string content_type "内容类型"
+        int risk_id FK "风险分类"
+    }
+
+    RISK_CLASSIFICATION {
+        int risk_id PK "分类编号"
+        string risk_type "风险类型"
+        string risk_level "风险等级"
+        string description "描述"
+    }
+
+    SCAN_STATS {
+        int stats_id PK "统计编号"
+        int task_id FK "所属任务"
+        int total "总请求数"
+        int found "发现数"
+        int not_found "未发现数"
+        int errors "错误数"
+    }
+
+    HTML_REPORT {
+        int report_id PK "报告编号"
+        int task_id FK "所属任务"
+        string file_name "报告文件名"
+        string file_path "文件路径"
+        datetime generated_at "生成时间"
+    }
+  </div>
+</div>
+
+<table class="desc-table">
+  <thead>
+    <tr>
+      <th>实体</th>
+      <th>说明</th>
+      <th>核心属性</th>
+      <th>关系</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>SYSTEM_CONFIG</b></td>
+      <td>系统配置，存储在 config.ini 中</td>
+      <td>threads, timeout, extensions, default_wordlist</td>
+      <td>一份配置可指定多个字典</td>
+    </tr>
+    <tr>
+      <td><b>DICTIONARY</b></td>
+      <td>字典文件，存储探测路径词条</td>
+      <td>file_name, file_path, entry_count</td>
+      <td>一个字典可生成多条候选路径</td>
+    </tr>
+    <tr>
+      <td><b>CANDIDATE_PATH</b></td>
+      <td>候选路径，字典词条展开后的待扫描路径</td>
+      <td>path, source_dict, extension</td>
+      <td>多条候选路径属于一次扫描任务</td>
+    </tr>
+    <tr>
+      <td><b>SCAN_TASK</b></td>
+      <td>扫描任务，每次扫描创建一条记录</td>
+      <td>task_id, target_url, status, created_at</td>
+      <td>一次任务包含多条候选路径、产出多条结果、汇总一份统计</td>
+    </tr>
+    <tr>
+      <td><b>SCAN_RESULT</b></td>
+      <td>扫描结果，每发现一个有效路径记录一条</td>
+      <td>path, status_code, content_type, risk_id</td>
+      <td>多条结果属于一个任务；每条结果归类于一种风险分类</td>
+    </tr>
+    <tr>
+      <td><b>RISK_CLASSIFICATION</b></td>
+      <td>风险分类，定义风险类型和等级</td>
+      <td>risk_type, risk_level, description</td>
+      <td>一种风险分类可对应多条扫描结果（多对一）</td>
+    </tr>
+    <tr>
+      <td><b>SCAN_STATS</b></td>
+      <td>扫描统计，记录一次扫描的汇总数据</td>
+      <td>total, found, not_found, errors</td>
+      <td>一条统计属于一个扫描任务（一对一）</td>
+    </tr>
+    <tr>
+      <td><b>HTML_REPORT</b></td>
+      <td>HTML报告，扫描完成后生成的独立报告文件</td>
+      <td>file_name, file_path, generated_at</td>
+      <td>一份报告对应一个任务，汇总所有结果和统计数据</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="footer">ListScanner 毕业设计项目 — 系统实体关系图（E-R图）</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#f5f5f5',
+    primaryTextColor: '#1a1a1a',
+    primaryBorderColor: '#555',
+    lineColor: '#555',
+    secondaryColor: '#f0f0f0',
+    tertiaryColor: '#f8f8f8',
+    fontFamily: '"Microsoft YaHei", Arial, sans-serif',
+    fontSize: '13px'
+  }
+});
+function copyDiagram() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const svgData = new XMLSerializer().serializeToString(svg);
+  navigator.clipboard.writeText(svgData).then(() => alert('SVG 已复制到剪贴板'));
+}
+</script>
+</body>
+</html>

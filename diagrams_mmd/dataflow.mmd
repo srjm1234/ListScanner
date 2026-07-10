@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor 用户
+    participant CLI as CLI/WebUI
+    participant CFG as config.py
+    participant WL as wordlist.py
+    participant SC as scanner.py
+    participant CL as classifier.py
+    participant NET as 目标网站
+    participant RPT as report.py
+
+    用户->>CLI: 输入参数 / 提交表单
+    CLI->>CFG: load_settings()
+    CFG-->>CLI: 返回默认配置
+    CLI->>WL: read_wordlist(file, exts)
+    WL-->>CLI: 返回路径列表 [paths]
+    CLI->>SC: WebScanner(url, paths, threads)
+    loop 每个路径 (多线程)
+        SC->>NET: HTTP GET /path
+        NET-->>SC: 响应（状态码, 响应体）
+        SC->>CL: check_risk(path)
+        CL-->>SC: (risk_type, risk_level)
+        SC->>SC: 构建 ScanResult
+    end
+    SC-->>CLI: 返回 results[]
+    CLI->>RPT: save_html_report(results)
+    RPT-->>用户: 生成 report.html

@@ -1,0 +1,92 @@
+<mxfile host="app.diagrams.net" agent="Claude">
+  <diagram id="arch-1" name="系统整体架构图">
+    <mxGraphModel dx="1201" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;" value="&lt;b&gt;系统整体架构图&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px;color:#666&quot;&gt;ListScanner Web路径扫描工具&lt;/font&gt;" vertex="1">
+          <mxGeometry height="50" width="400" x="350" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cluster_user" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;strokeWidth=1.5;dashed=0;fontStyle=1;fontSize=13;verticalAlign=top;spacingTop=5;" value="用户层" vertex="1">
+          <mxGeometry height="120" width="440" x="80" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cli" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=1.5;fontSize=12;" value="&lt;b&gt;CLI 命令行&lt;/b&gt;&lt;br&gt;&lt;i&gt;cli.py&lt;/i&gt;" vertex="1">
+          <mxGeometry height="55" width="160" x="120" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="web" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=1.5;fontSize=12;" value="&lt;b&gt;WebUI 浏览器&lt;/b&gt;&lt;br&gt;&lt;i&gt;webapp.py + index.html&lt;/i&gt;" vertex="1">
+          <mxGeometry height="55" width="170" x="320" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="cluster_core" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;strokeWidth=2;dashed=0;fontStyle=1;fontSize=13;verticalAlign=top;spacingTop=5;" value="核心引擎" vertex="1">
+          <mxGeometry height="140" width="440" x="80" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="scanner" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=1.5;fontSize=12;" value="&lt;b&gt;扫描器&lt;/b&gt;&lt;br&gt;&lt;i&gt;scanner.py&lt;/i&gt;&lt;br&gt;WebScanner" vertex="1">
+          <mxGeometry height="70" width="130" x="100" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="classifier" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=1.5;fontSize=12;" value="&lt;b&gt;风险分类器&lt;/b&gt;&lt;br&gt;&lt;i&gt;classifier.py&lt;/i&gt;&lt;br&gt;check_risk()" vertex="1">
+          <mxGeometry height="70" width="130" x="260" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="wordlist" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=1.5;fontSize=12;" value="&lt;b&gt;字典处理器&lt;/b&gt;&lt;br&gt;&lt;i&gt;wordlist.py&lt;/i&gt;&lt;br&gt;read_wordlist()" vertex="1">
+          <mxGeometry height="70" visible="false" width="80" x="420" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="cluster_data" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#888888;strokeWidth=1;dashed=0;fontStyle=1;fontSize=13;verticalAlign=top;spacingTop=5;" value="数据层" vertex="1">
+          <mxGeometry height="120" width="440" x="80" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="models" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#777777;strokeWidth=1;fontSize=11;" value="&lt;b&gt;数据模型&lt;/b&gt;&lt;br&gt;&lt;i&gt;models.py&lt;/i&gt;&lt;br&gt;ScanResult / ScanStats" vertex="1">
+          <mxGeometry height="60" width="130" x="100" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="config" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#777777;strokeWidth=1;fontSize=11;" value="&lt;b&gt;配置管理&lt;/b&gt;&lt;br&gt;&lt;i&gt;config.py&lt;/i&gt;&lt;br&gt;config.ini" vertex="1">
+          <mxGeometry height="60" width="120" x="260" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="report" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#777777;strokeWidth=1;fontSize=11;" value="&lt;b&gt;报告生成器&lt;/b&gt;&lt;br&gt;&lt;i&gt;report.py&lt;/i&gt;&lt;br&gt;HTML Report" vertex="1">
+          <mxGeometry height="60" width="90" x="410" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="cluster_ext" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#aaaaaa;strokeWidth=1;dashed=1;fontStyle=1;fontSize=13;verticalAlign=top;spacingTop=5;" value="外部资源" vertex="1">
+          <mxGeometry height="140" width="200" x="600" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="dict" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#aaaaaa;strokeWidth=1;fontSize=11;dashed=1;" value="&lt;b&gt;字典文件&lt;/b&gt;&lt;br&gt;dictionary/*.txt" vertex="1">
+          <mxGeometry height="40" width="150" x="625" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="target" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#aaaaaa;strokeWidth=1;fontSize=11;dashed=1;" value="&lt;b&gt;目标网站&lt;/b&gt;&lt;br&gt;HTTP Server" vertex="1">
+          <mxGeometry height="40" width="150" x="625" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="cli" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;fontSize=11;" target="scanner">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="web" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;fontSize=11;" target="scanner" value="REST API">
+          <mxGeometry relative="1" x="0.5676" y="-15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="scanner" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;" target="classifier">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="scanner" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="target" value="HTTP GET">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="scanner" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;" target="models">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="report" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;" target="models">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="455" y="550" />
+              <mxPoint x="165" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="config" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;" target="cli">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="config" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;" target="web">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="scanner" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#555555;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="dict">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;color=#999999;" value="ListScanner 毕业设计项目 - 系统架构图" vertex="1">
+          <mxGeometry height="30" width="400" x="350" y="560" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

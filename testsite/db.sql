@@ -1,0 +1,1 @@
+CREATE TABLE logs(id INT PRIMARY KEY, message VARCHAR(255));

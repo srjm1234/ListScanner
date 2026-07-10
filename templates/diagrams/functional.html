@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>功能结构图 - ListScanner</title>
+<style>
+  @page { size: A4 landscape; margin: 15mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    background: #fff; color: #1a1a2e;
+    padding: 40px; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .page-header {
+    text-align: center; margin-bottom: 24px; width: 100%; max-width: 960px;
+  }
+  .page-header h1 {
+    font-size: 22px; font-weight: 700; color: #1a1a2e;
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .page-header .subtitle {
+    font-size: 13px; color: #666;
+  }
+  .diagram-wrap {
+    background: #fff; border: 1.5px solid #d1d5db;
+    border-radius: 8px; padding: 24px; width: 100%; max-width: 960px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .diagram-wrap .mermaid { text-align: center; }
+  .detail-table {
+    margin-top: 20px; width: 100%; max-width: 960px;
+    border-collapse: collapse;
+  }
+  .detail-table th, .detail-table td {
+    border: 1px solid #d1d5db;
+    padding: 8px 14px;
+    text-align: left;
+    font-size: 13px;
+  }
+  .detail-table th {
+    background: #e8e8e8;
+    color: #333;
+    font-weight: 600;
+  }
+  .detail-table td { color: #374151; }
+  .detail-table tr:nth-child(even) td { background: #f8fafc; }
+  .toolbar {
+    position: fixed; top: 16px; right: 16px;
+    display: flex; gap: 8px; z-index: 100;
+  }
+  .toolbar button {
+    padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 6px;
+    background: #fff; color: #374151; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .toolbar button:hover { background: #f3f4f6; border-color: #9ca3af; }
+  .toolbar button.primary { background: #333; color: #fff; border-color: #333; }
+  .toolbar button.primary:hover { background: #222; }
+  .footer {
+    margin-top: 20px; font-size: 11px; color: #9ca3af; text-align: center;
+  }
+  @media print {
+    body { padding: 0; }
+    .toolbar { display: none; }
+    .diagram-wrap { border: 1px solid #ccc; box-shadow: none; }
+    .detail-table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button onclick="window.print()">打印 / 导出PDF</button>
+  <button class="primary" onclick="copyDiagram()">复制图表</button>
+</div>
+<div class="page-header">
+  <h1>功能结构图</h1>
+  <div class="subtitle">ListScanner Web路径扫描工具 - 功能模块分解</div>
+</div>
+<div class="diagram-wrap">
+  <div class="mermaid">
+graph TD
+    SCAN["<b>ListScanner 扫描功能</b>"]
+
+    SCAN --> A["目标地址配置"]
+    SCAN --> B["字典与扩展名管理"]
+    SCAN --> C["生成候选路径"]
+    SCAN --> D["多线程并发扫描"]
+    SCAN --> E["扫描执行"]
+    SCAN --> F["扫描报告生成"]
+  </div>
+</div>
+
+<table class="detail-table">
+  <thead>
+    <tr>
+      <th>功能模块</th>
+      <th>子功能</th>
+      <th>说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="4"><b>字典管理</b></td>
+      <td>选择字典</td>
+      <td>从 dictionary/ 目录中选择已有字典文件</td>
+    </tr>
+    <tr><td>编辑字典</td><td>在线编辑字典内容，支持注释和 %EXT% 占位符</td></tr>
+    <tr><td>新建字典</td><td>创建自定义字典文件</td></tr>
+    <tr><td>预览展开</td><td>预览字典展开后的完整路径列表</td></tr>
+    <tr>
+      <td rowspan="3"><b>扫描执行</b></td>
+      <td>多线程请求</td>
+      <td>使用 ThreadPoolExecutor 并发发送 HTTP GET 请求</td>
+    </tr>
+    <tr><td>风险分类</td><td>调用 classifier.check_risk() 判断路径风险等级</td></tr>
+    <tr><td>进度跟踪</td><td>实时更新完成数、发现数、错误数统计</td></tr>
+    <tr>
+      <td rowspan="5"><b>结果展示</b></td>
+      <td>实时日志</td>
+      <td>终端风格实时显示扫描发现的路径</td>
+    </tr>
+    <tr><td>统计面板</td><td>进度条 + 四项核心指标（总数/发现/高风险/错误）</td></tr>
+    <tr><td>结果表格</td><td>展示状态码、风险等级、URL、大小等详细信息</td></tr>
+    <tr><td>风险筛选</td><td>按高/中/低风险等级过滤结果</td></tr>
+    <tr><td>HTML报告</td><td>扫描完成后自动生成独立的 HTML 报告文件</td></tr>
+    <tr>
+      <td><b>目标地址配置</b></td>
+      <td>URL 输入</td>
+      <td>支持带/不带协议前缀，自动补全 http:// 和尾部斜杠</td>
+    </tr>
+    <tr>
+      <td><b>扩展名配置</b></td>
+      <td>扩展名标签</td>
+      <td>点击切换启用/禁用，支持添加自定义扩展名</td>
+    </tr>
+    <tr>
+      <td><b>并发参数</b></td>
+      <td>线程数 / 超时</td>
+      <td>滑块调节线程数（1-50）和请求超时（1-30秒）</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="footer">ListScanner 毕业设计项目 - 功能结构图</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#f5f5f5',
+    primaryTextColor: '#1a1a1a',
+    primaryBorderColor: '#555',
+    lineColor: '#555',
+    secondaryColor: '#f0f0f0',
+    tertiaryColor: '#f8f8f8',
+    fontFamily: '"Microsoft YaHei", Arial, sans-serif',
+    fontSize: '12px'
+  }
+});
+function copyDiagram() {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  const svgData = new XMLSerializer().serializeToString(svg);
+  navigator.clipboard.writeText(svgData).then(() => alert('SVG 已复制到剪贴板'));
+}
+</script>
+</body>
+</html>

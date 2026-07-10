@@ -1,0 +1,65 @@
+<mxfile host="app.diagrams.net" agent="Claude">
+  <diagram id="checkpath-1" name="check_path() 流程图">
+    <mxGraphModel dx="1092" dy="706" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="800" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;" value="&lt;b&gt;check_path() 函数流程&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px;color:#666&quot;&gt;ListScanner — scanner.py 核心函数流程图&lt;/font&gt;" vertex="1">
+          <mxGeometry height="50" width="500" x="150" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="urljoin" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#fafafa;strokeColor=#666666;strokeWidth=1.5;fontSize=12;size=15;" value="url = urljoin(target, path)" vertex="1">
+          <mxGeometry height="45" width="220" x="270" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="req" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#555555;strokeWidth=1.5;fontSize=12;" value="requests.get(url, timeout)" vertex="1">
+          <mxGeometry height="45" width="200" x="280" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="check" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#444444;strokeWidth=2;fontSize=12;fontStyle=1;" value="status == 404?" vertex="1">
+          <mxGeometry height="80" width="140" x="310" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="risk" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#555555;strokeWidth=1.5;fontSize=12;" value="check_risk(path)" vertex="1">
+          <mxGeometry height="45" width="170" x="295" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="build" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#555555;strokeWidth=1.5;fontSize=12;" value="构建 ScanResult" vertex="1">
+          <mxGeometry height="45" width="170" x="295" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" style="strokeColor=#333333;strokeWidth=1.5;" target="urljoin">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="380" y="125" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="urljoin" style="strokeColor=#333333;strokeWidth=1.5;" target="req">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="req" style="strokeColor=#333333;strokeWidth=1.5;fontSize=11;" target="check" value="成功">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="check" style="strokeColor=#333333;strokeWidth=1.5;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="是">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="540" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="check" style="strokeColor=#333333;strokeWidth=1.5;fontSize=11;" target="risk" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="risk" style="strokeColor=#333333;strokeWidth=1.5;" target="build">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="build" style="strokeColor=#333333;strokeWidth=1.5;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="t76n6g0ZHNEUtyb-aD8W-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;color=#999999;" value="ListScanner 毕业设计项目 — check_path() 流程图" vertex="1">
+          <mxGeometry height="30" width="500" x="150" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="t76n6g0ZHNEUtyb-aD8W-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-weight: 700;&quot;&gt;返回 (result, found)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="50" width="140" x="310" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="t76n6g0ZHNEUtyb-aD8W-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="&lt;b&gt;check_path(path) 开始&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="140" x="310" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="t76n6g0ZHNEUtyb-aD8W-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;返回 (None, not_found)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="50" width="140" x="540" y="335" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

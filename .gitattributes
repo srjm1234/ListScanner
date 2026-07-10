@@ -1,0 +1,20 @@
+# 统一换行符，避免 Windows / Linux 协作时的差异
+* text=auto eol=lf
+
+*.py text
+*.html text
+*.json text
+*.md text
+*.txt text
+*.mmd text
+*.xml text
+*.yml text
+*.svg text
+
+# 二进制资源保持原样
+*.ico binary
+*.exe binary
+*.zip binary
+*.png binary
+*.jpg binary
+*.gif binary
